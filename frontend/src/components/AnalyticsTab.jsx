@@ -116,7 +116,7 @@ const AnalyticsCard = ({ title, value, icon: Icon, color }) => (
 				<h3 className='text-white text-3xl font-bold'>{value}</h3>
 			</div>
 		</div>
-		<div className='absolute inset-0 bg-gradient-to-br from-red-600 to-red-900 opacity-30' />
+		<div className='absolute inset-0 bg-linear-to-br from-red-600 to-red-900 opacity-30' />
 		<div className='absolute -bottom-4 -right-4 text-red-500 opacity-50'>
 			<Icon className='h-32 w-32' />
 		</div>
