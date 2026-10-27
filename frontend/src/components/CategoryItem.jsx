@@ -1,27 +1,36 @@
-import React from 'react'
-import { Link } from 'react-router-dom';
 
-const CategoryItem = ({category}) => {
-     if (!category) return null;
+import { Link } from "react-router-dom";
+
+const CategoryItem = ({ category }) => {
+  if (!category) return null;
+
   return (
-    <div className="relative overflow-hidden h-96 w-full rounded-lg group">
-        <Link to={`/category/${encodeURIComponent(category.name)}`}>
-            <div className='w-full h-full cursor-pointer'>
-                <div className='absolute inset-0 bg-linear-to-r from-transparent to-gray-900/50 z-10'/>
-                <img
-                    src={category.imageUrl}
-                    alt={category.name}
-                    className="object-cover w-full h-full transition-transform duration-500 ease-out group-hover:scale-110"
-                    loading="lazy"
-                />
-                <div className='absolute bottom-0 left-0 right-0 p-4 z-20'>
-                    <h3 className='text-2xl font-bold text-white mb-2'>{category.name}</h3>
-                    <p className='text-gray-200 text-sm'>Explore our {category.name} collection</p>
-                </div>       
-            </div>        
-        </Link>
-    </div>
+    <Link
+      to={`/category/${encodeURIComponent(category.name)}`}
+      className="group relative block h-52 w-full overflow-hidden rounded-lg sm:h-72 lg:h-96"
+    >
+      <img
+        src={category.imageUrl}
+        alt={category.name}
+        className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+        loading="lazy"
+      />
+
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent" />
+
+      {/* Category information */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 p-2 sm:p-4">
+        <h3 className="mb-1 text-sm font-bold leading-tight text-white sm:text-xl lg:text-2xl">
+          {category.name}
+        </h3>
+
+        <p className="hidden text-sm text-gray-200 sm:block">
+          Explore our {category.name} collection
+        </p>
+      </div>
+    </Link>
   );
 };
 
-export default CategoryItem
+export default CategoryItem;
