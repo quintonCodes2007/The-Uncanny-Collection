@@ -11,11 +11,12 @@ const LoginPage = () => {
 
    const { login, loading } = useUserStore();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    login({email, password});
-    
-  };
+  
+const handleSubmit = (e) => {
+  e.preventDefault();
+  login(email, password);
+};
+
 
   return (
 
