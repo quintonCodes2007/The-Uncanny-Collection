@@ -16,32 +16,52 @@ const ProductCard = ({ product }) => {
         }
     }
 
-  return (
-    <div className='flex w-full relative flex-col overflow-hidden rounded-lg border border-gray-700 shadow-lg'>
-        <div className='relative mx-3 mt-3 flex h-60 overflow-hidden rounded-xl'>
-            <img className='object-cover w-full' src={product.image} alt={product.name} />
+  
+return (
+  <div className="flex min-w-0 flex-col overflow-hidden rounded-lg border border-gray-700 bg-gray-900 shadow-lg">
 
-        </div>
-
-        <div className='mt-4 px-5 pb-5'>
-            <h5 className='text-xl font-semibold tracking-tight text-red-300'>{product.name}</h5>
-
-            <p className='text-sm text-gray-400 mt-1'>{product.description}</p>
-
-            <div className='mt-2 mb-5 flex items-center justify-between'>
-                <p>
-                    <span className='text-3xl font-bold text-red-500'>${product.price.toFixed(2)}</span>
-                </p>
-            </div>
-            <button className='flex items-center justify-center rounded-lg bg-red-800 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-500 dark:focus:ring-red-800'
-            onClick={handleAddToCart}
-            >
-                <ShoppingCart size={22} className='mr-2' />
-                Add to cart
-            </button>
-        </div>
+    {/* Compact square product image */}
+    <div className="aspect-square w-full overflow-hidden">
+      <img
+        src={product.image}
+        alt={product.name}
+        loading="lazy"
+        className="h-full w-full object-cover"
+      />
     </div>
-  )
+
+    {/* Product details */}
+    <div className="flex flex-1 flex-col p-1.5 sm:p-3">
+
+      <h3 className="line-clamp-2 text-[10px] leading-tight font-semibold text-red-300 sm:text-sm">
+        {product.name}
+      </h3>
+
+      {/* Hide descriptions on smaller screens */}
+      <p className="mt-1 hidden line-clamp-2 text-xs text-gray-400 sm:block">
+        {product.description}
+      </p>
+
+      <div className="mt-auto pt-2">
+        <p className="truncate text-xs font-bold text-red-500 sm:text-lg">
+          ${product.price.toFixed(2)}
+        </p>
+      </div>
+
+      <button
+        type="button"
+        onClick={handleAddToCart}
+        aria-label={`Add ${product.name} to cart`}
+        className="mt-2 flex min-h-8 w-full items-center justify-center rounded-md bg-red-800 px-1 py-1.5 text-white transition-colors hover:bg-red-700 sm:gap-1"
+      >
+        <ShoppingCart size={16} className="shrink-0" />
+        <span className="hidden text-xs sm:inline">Add</span>
+      </button>
+
+    </div>
+  </div>
+);
+
 }
 
 export default ProductCard

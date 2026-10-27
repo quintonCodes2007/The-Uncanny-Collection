@@ -32,11 +32,13 @@ const HomePageProducts = () => {
 
   return  (<div className='mt-20'>
     <h1 className='text-5xl font-semibold text-center  text-red-400'>Discover Something Uncanny</h1>
-    <div className='mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4'>
-      {homepageProducts?.map((product) => (
-        <ProductCard key={product._id} product={product} />
-      ))}
-    </div>
+    
+<div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
+  {homepageProducts?.map((product) => (
+    <ProductCard key={product._id} product={product} />
+  ))}
+</div>
+
 
   </div>);
 }
