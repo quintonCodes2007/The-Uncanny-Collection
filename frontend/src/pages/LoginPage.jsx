@@ -38,7 +38,7 @@ const handleSubmit = (e) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, delay: 0.1 }}
       >
-        <div className='bg-red-300/10 shadow-lg rounded-lg p-8 max-w-xl mx-auto'>
+        <div className="w-full max-w-xl mx-auto px-4 py-8 sm:p-8">
 
 
           

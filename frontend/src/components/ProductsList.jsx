@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { Trash, Star } from 'lucide-react';
 import { useProductStore } from '../stores/useProductStore';
-import { useEffect } from 'react';
 
 const ProductsList = () => {
 
@@ -12,12 +11,15 @@ const ProductsList = () => {
   console.log("products", products);
 
   return (
-    <motion.div 
-      className='bg-red-300/10 shadow-lg rounded-lg overflow-hidden max-w-7xl mx-auto'
+    <motion.div
+  className="w-full min-w-0 max-w-7xl mx-auto rounded-lg bg-red-300/10 shadow-lg"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
     >
+      {/* Scrollable table container */}
+    <div className="w-full overflow-x-auto rounded-lg">
+
 
       <table className='min-w-full divide-y divide-red-500 table-fixed'>
         <thead className='bg-gray-800'>
@@ -92,7 +94,7 @@ const ProductsList = () => {
         </tbody>
 
       </table>
-
+    </div>
     </motion.div>
   )
 }
