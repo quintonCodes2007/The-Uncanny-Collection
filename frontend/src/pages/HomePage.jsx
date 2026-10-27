@@ -18,7 +18,7 @@ const HomePage = () => {
   return (
     <div className="relative min-h-creen text-white overflow-hidden">
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7">
-            <h1 className="text-center text-3xl font-bold sm:text-5xl lg:text-6xl text-red-400 mb-4">
+            <h1  className="text-center text-3xl font-bold sm:text-5xl lg:text-6xl text-red-400 mb-4">
   Browse Our Curiosities
 </h1>
             <p className="text-center text-base sm:text-xl text-gray-400 mb-8 sm:mb-12">
