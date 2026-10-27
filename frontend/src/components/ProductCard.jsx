@@ -18,7 +18,7 @@ const ProductCard = ({ product }) => {
 
   
 return (
-  <div className="flex min-w-0 flex-col overflow-hidden rounded-lg border border-gray-700 bg-gray-900 shadow-lg">
+  <div className="flex min-w-0 flex-col overflow-hidden rounded-lg border border-gray-700 shadow-lg">
 
     {/* Compact square product image */}
     <div className="aspect-square w-full overflow-hidden">
