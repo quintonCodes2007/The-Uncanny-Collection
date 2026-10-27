@@ -63,8 +63,10 @@ const EmptyCartUI = () => (
     transition={{ duration: 0.5}}
   >
     <ShoppingCart className='h-24 w-24 text-gray-400' />
-    <h3 className='text-2xl font-semibold'>Your cart is empty</h3>
-    <p className='text-gray-500 text-2xl'>Go ahead and add some items to your cart.</p>
+    <h3 className="text-center text-xl font-semibold sm:text-2xl">
+  Your cart is empty
+</h3>
+    <p className="max-w-sm px-4 text-center text-sm text-gray-400 sm:text-lg">Go ahead and add some items to your cart.</p>
     
     <Link to='/' className='mt-4 text-gray-500 hover:text-gray-600'>
       <span className='text-1xl px-1'>Browse products</span>
