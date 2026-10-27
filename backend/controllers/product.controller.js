@@ -112,6 +112,28 @@ export const getRecommendedProducts = async (req, res) => {
         res.status(500).json({message: "Server error", error:error.message});
     }
 };
+export const getHomePageProducts = async (req, res) => {
+    try {
+        const products = await Product.aggregate([
+            { 
+                $sample: { size: 15 } 
+            }, 
+            {
+                $project: {
+                    _id: 1,
+                    name: 1,
+                    description: 1,
+                    image: 1,
+                    price: 1
+                }
+            }
+        ]); // Get 3 random products
+        res.json(products);
+    } catch (error) {
+        console.error("Error in getRecommendedProducts controller:", error.message);
+        res.status(500).json({message: "Server error", error:error.message});
+    }
+};
 
 export const getProductsByCategory = async (req, res) => {
     try {

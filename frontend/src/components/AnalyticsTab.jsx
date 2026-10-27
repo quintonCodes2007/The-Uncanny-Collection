@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import axios from "../lib/axios";
-import { Users, Package, ShoppingCart, DollarSign } from "lucide-react";
+import { Users, Package, ShoppingCart, DollarSign, Loader } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 
@@ -32,7 +32,9 @@ const AnalyticsTab = () => {
 	}, []);
 
 	if (isLoading) {
-		return <div>Loading...</div>;
+		return <div className="flex items-center justify-center p-50 bg-gray-90 animate-spin rounded-full ">
+			<Loader />
+		</div>;
 	}
 
 	return (

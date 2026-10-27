@@ -1,13 +1,12 @@
-import React from 'react'
-import { href } from 'react-router-dom';
 import CategoryItem from '../components/CategoryItem';
+import HomePageProducts from '../components/HomePageProducts';
 
 const categories = [
     {href: '/organ', name: 'Organs', imageUrl:"/heart.jpeg" },
-    {href: '/cursedArtifacts', name: 'Cursed Artifacts', imageUrl:"/weapon2.jpg" },
     {href: '/forbiddenLibrary', name: 'Forbidden Library', imageUrl:"/book3.jpg" },
+    {href: '/weapons', name: 'Weapons', imageUrl:"/weapon2.jpg" },
     {href: '/creepyCollectibles', name: 'Creepy Collectibles', imageUrl:"/doll1.jpg" },
-    {href: '/paranormal', name: 'Paranormal', imageUrl:"/book2.jpg" },
+    {href: '/potions', name: 'Potions', imageUrl:"/potion1.jpeg" },
     {href: '/witchesApothecary', name: 'Witches Apothecary', imageUrl:"/book1.jpg" },
     {href: '/The "Questionable" Shelf', name: 'The "Questionable" Shelf', imageUrl:"/weapon1.jpg" },
     {href: '/lost&found', name: 'Lost & Found (Definitely Not Stolen)', imageUrl:"/book1.jpg" },
@@ -34,6 +33,8 @@ const HomePage = () => {
                     />
                 ))}
             </div>
+
+            <HomePageProducts />
 
         </div>
     </div>
