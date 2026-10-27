@@ -37,9 +37,51 @@ const AnalyticsTab = () => {
 		</div>;
 	}
 
+
+		const formatXAxisDate = (dateString) => {
+		// Parse the YYYY-MM-DD date safely
+		const [year, month, day] = dateString.split("-").map(Number);
+		const date = new Date(year, month - 1, day);
+
+		const now = new Date();
+		const today = new Date(
+			now.getFullYear(),
+			now.getMonth(),
+			now.getDate()
+		);
+
+		const yesterday = new Date(today);
+		yesterday.setDate(today.getDate() - 1);
+
+		if (date.getTime() === today.getTime()) {
+			return "Today";
+		}
+
+		if (date.getTime() === yesterday.getTime()) {
+			return "Yest";
+		}
+
+		return date.toLocaleDateString("en-US", {
+			weekday: "short"
+		});
+		};
+
+		const maxSales = Math.max(
+		0,
+		...dailySalesData.map((day) => day.sales)
+		);
+
+		const salesTicks = Array.from(
+		{ length: Math.max(9, maxSales + 1) },
+		(_, i) => i
+		);
+
+
 	return (
 		<div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-			<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
+			
+		<div className="mb-8 grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
+
 				<AnalyticsCard
 					title='Total Users'
 					value={analyticsData.users.toLocaleString()}
@@ -66,17 +108,40 @@ const AnalyticsTab = () => {
 				/>
 			</div>
 			<motion.div
-				className='bg-red-900/20 rounded-lg p-6 shadow-lg'
+				className="min-w-0 rounded-lg bg-red-900/20 p-3 shadow-lg sm:p-6"
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.5, delay: 0.25 }}
 			>
-				<ResponsiveContainer width='100%' height={400}>
-					<LineChart data={dailySalesData}>
+				<div className="w-full min-w-0 overflow-x-auto overscroll-x-contain">
+				<div className="h-[300px] w-[140%] md:h-[400px] md:w-full">
+						<ResponsiveContainer width="100%" height="100%">
+						<LineChart data={dailySalesData}>
 						<CartesianGrid strokeDasharray='3 5' />
-						<XAxis dataKey='date' stroke='#D1D5DB' />
-						<YAxis yAxisId='left' stroke='#D1D5DB' />
-						<YAxis yAxisId='right' orientation='right' stroke='#D1D5DB' />
+						
+						<XAxis
+						dataKey="date"
+						stroke="#D1D5DB"
+						tickFormatter={formatXAxisDate}
+						interval={0}
+						tick={{ fontSize: 12 }}
+						minTickGap={5}
+						/>
+						
+						<YAxis
+						yAxisId="left"
+						stroke="#D1D5DB"
+						allowDecimals={false}
+						domain={[0, salesTicks[salesTicks.length - 1]]}
+						ticks={salesTicks}
+						interval={0}
+						/>
+
+						<YAxis
+						yAxisId="right"
+						orientation="right"
+						stroke="#D1D5DB"
+						/>
 						<Tooltip />
 						<Legend />
 						<Line
@@ -97,6 +162,8 @@ const AnalyticsTab = () => {
 						/>
 					</LineChart>
 				</ResponsiveContainer>
+			</div>
+		</div>
 			</motion.div>
 		</div>
 	);
@@ -105,7 +172,9 @@ export default AnalyticsTab;
 
 const AnalyticsCard = ({ title, value, icon: Icon, color }) => (
 	<motion.div
-		className={`bg-gray-800 rounded-lg p-6 shadow-lg overflow-hidden relative ${color}`}
+		
+		className={`bg-gray-800 rounded-lg p-3 sm:p-6 shadow-lg overflow-hidden relative min-w-0 ${color}`}
+
 		initial={{ opacity: 0, y: 20 }}
 		animate={{ opacity: 1, y: 0 }}
 		transition={{ duration: 0.5 }}
@@ -113,12 +182,14 @@ const AnalyticsCard = ({ title, value, icon: Icon, color }) => (
 		<div className='flex justify-between items-center'>
 			<div className='z-10'>
 				<p className='text-red-300 text-sm mb-1 font-semibold'>{title}</p>
-				<h3 className='text-white text-3xl font-bold'>{value}</h3>
+				<h3 className="text-white text-xl sm:text-3xl font-bold break-words">
+  {value}
+</h3>
 			</div>
 		</div>
 		<div className='absolute inset-0 bg-linear-to-br from-red-600 to-red-900 opacity-30' />
 		<div className='absolute -bottom-4 -right-4 text-red-500 opacity-50'>
-			<Icon className='h-32 w-32' />
+			<Icon className="h-16 w-16 sm:h-32 sm:w-32" />
 		</div>
 	</motion.div>
 );
