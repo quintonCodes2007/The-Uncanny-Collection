@@ -22,7 +22,11 @@ export const getFeaturedProducts = async (req, res) => {
         //if not in redis, fetch from database
         //.lean() is used to return plain JavaScript objects instead of Mongoose documents, which can improve performance when you don't need the full Mongoose document functionality.
         
-        featuredProducts = await Product.find({isFeatured: true}).lean();
+        featuredProducts = await Product.find({
+            isFeatured: true,
+            isVisible: { $ne: false },
+            inventoryQuantity: { $gt: 0 }
+            }).lean();
 
         if(!featuredProducts) {
             return res.status(404).json({message: "No featured products found"});
@@ -125,8 +129,14 @@ export const getRecommendedProducts = async (req, res) => {
 export const getHomePageProducts = async (req, res) => {
     try {
         const products = await Product.aggregate([
-            { 
-                $sample: { size: 15 } 
+            {
+                $match: {
+                    isVisible: { $ne: false },
+                    inventoryQuantity: { $gt: 0 }
+                }
+            },
+            {
+                $sample: { size: 15 } // Use 3 for recommendations
             }, 
             {
                 $project: {
@@ -148,7 +158,11 @@ export const getHomePageProducts = async (req, res) => {
 export const getProductsByCategory = async (req, res) => {
     try {
         const { category } = req.params;
-        const products = await Product.find({ category });
+        const products = await Product.find({
+            category,
+            isVisible: { $ne: false },
+            inventoryQuantity: { $gt: 0 }
+            });
         res.json({products});
     } catch (error) {
         console.error("Error in getProductsByCategory controller:", error.message);
@@ -175,7 +189,11 @@ export const toggleFeaturedProduct = async (req, res) => {
 
 async function updateFeaturedProductsCache() {
     try {
-        const featuredProducts = await Product.find({ isFeatured: true }).lean();
+        const featuredProducts = await Product.find({
+            isFeatured: true,
+            isVisible: { $ne: false },
+            inventoryQuantity: { $gt: 0 }
+            }).lean();
         await redis.set("featuredProducts", JSON.stringify(featuredProducts));
     } catch (error) {
         console.error("Error updating featured products cache:", error.message);
