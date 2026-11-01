@@ -41,6 +41,30 @@ export const addToCart = async (req, res) => {
         const { productId } = req.body;
         const user = req.user;
 
+        const product = await Product.findById(productId);
+
+        if (
+        !product ||
+        product.isVisible === false ||
+        product.inventoryQuantity <= 0
+        ) {
+        return res.status(400).json({
+            message: "This product is unavailable",
+        });
+        }
+
+        const cartItem = user.cartItems.find(
+        item => item.product.toString() === productId
+        );
+
+        const currentQuantity = cartItem?.quantity || 0;
+
+        if (currentQuantity >= product.inventoryQuantity) {
+        return res.status(400).json({
+            message: `Only ${product.inventoryQuantity} items available in stock`,
+        });
+        }
+
         const existingItem = user.cartItems.find(
             item =>
                 item.product.toString() === productId.toString()
@@ -109,6 +133,32 @@ export const updateQuantity = async (req, res) => {
     try {
         const { productId, quantity } = req.body;
         const user = req.user;
+
+        if (!Number.isSafeInteger(quantity) || quantity < 0) {
+            return res.status(400).json({
+                message: "Quantity must be a non-negative whole number",
+            });
+            }
+
+            const product = await Product.findById(productId);
+
+            if (!product) {
+            return res.status(404).json({
+                message: "Product not found",
+            });
+            }
+
+            if (quantity > 0 && product.isVisible === false) {
+            return res.status(400).json({
+                message: "This product is unavailable",
+            });
+            }
+
+            if (quantity > product.inventoryQuantity) {
+            return res.status(400).json({
+                message: `Only ${product.inventoryQuantity} items available in stock`,
+            });
+            }
 
         const existingItem = user.cartItems.find(
             item =>
