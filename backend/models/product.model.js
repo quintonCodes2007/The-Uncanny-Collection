@@ -15,9 +15,18 @@ const productSchema = new mongoose.Schema({
         required: true,
     },
     inventoryQuantity: {
-        type: Number,
-        min: 0,
-        default: 0,
+    type: Number,
+    required: true,
+    min: 0,
+    default: 0,
+    validate: {
+        validator: Number.isSafeInteger,
+        message: "Inventory must be a whole number"
+    }
+    },
+    isVisible: {
+        type: Boolean,
+        default: true
     },
     image: {
         type: String,
