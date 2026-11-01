@@ -12,11 +12,12 @@ import CheckoutPage from "./pages/CheckoutPage";
 
 import { useUserStore } from "./stores/useUserStore";
 import { useCartStore } from "./stores/useCartStore";
+import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
+import PurchaseCancelPage from "./pages/PurchaseCancelPage";
 
 import Navbar from "./components/Navbar";
 import LoadingSpinner from "./components/LoadingSpinner";
-import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
-import PurchaseCancelPage from "./pages/PurchaseCancelPage";
+import Footer from "./components/Footer";
 
 
 
@@ -51,6 +52,7 @@ useEffect(() => {
 
       <div>
       <Navbar />
+      <main className="min-h-[70vh] flex-1 pb-12 sm:pb-16">
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/signup" element={!user ? <SignUpPage /> : <Navigate to="/" />} />
@@ -61,7 +63,9 @@ useEffect(() => {
         <Route path="/purchase-success" element= {user ? <PurchaseSuccessPage />: <Navigate to='/login'/>} />
         <Route path="/purchase-cancel" element= {user ? <PurchaseCancelPage />: <Navigate to='/login'/>} />
       </Routes>
+      </main>
     </div>
+    <Footer />
     <Toaster/>
     </div>
   );
