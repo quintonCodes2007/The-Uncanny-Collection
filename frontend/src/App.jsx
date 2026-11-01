@@ -9,11 +9,12 @@ import LoginPage from "./pages/LoginPage";
 import CategoryPage from "./pages/CategoryPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
+import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
+import PurchaseCancelPage from "./pages/PurchaseCancelPage";
+import PurchaseFailedPage from "./pages/PurchaseFailedPage";
 
 import { useUserStore } from "./stores/useUserStore";
 import { useCartStore } from "./stores/useCartStore";
-import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
-import PurchaseCancelPage from "./pages/PurchaseCancelPage";
 
 import Navbar from "./components/Navbar";
 import LoadingSpinner from "./components/LoadingSpinner";
@@ -61,7 +62,9 @@ useEffect(() => {
         <Route path="/category/:category" element= {<CategoryPage />}  />
         <Route path="/cart" element= {user ? <CartPage />: <Navigate to='/login'/>} />
         <Route path="/purchase-success" element= {user ? <PurchaseSuccessPage />: <Navigate to='/login'/>} />
+        <Route path="/purchase-failed"element={<PurchaseFailedPage />} />
         <Route path="/purchase-cancel" element= {user ? <PurchaseCancelPage />: <Navigate to='/login'/>} />
+
       </Routes>
       </main>
     </div>
