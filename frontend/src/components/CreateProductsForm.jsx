@@ -93,19 +93,25 @@ const CreateProductsForm = () => {
 
                 <div className="grid grid-cols-2 gap-2">
 
-                    <input
-                    id='inventoryQuantity'
-                    type='number'
-                    name='inventoryQuantity'
-                    value={newProduct.inventoryQuantity}
-                    onChange={(e) => setNewProduct({ ...newProduct, inventoryQuantity: e.target.value })}
-                    step='1'
-                    className='mt-1 block w-full border border-red-400/40 rounded-md  shadow-sm py-2 px-3 focus:border-red-400 focus:ring-1 focus:ring-red-500 focus:outline-none'
-                    required placeholder='Inventory Quantity'
-                
-                    className='mt-1 block w-full border border-red-400/40 rounded-md  shadow-sm py-2 px-3 focus:border-red-400 focus:ring-1 focus:ring-red-500 focus:outline-none'
-                    required placeholder='Number of items in stock'
+                    
+                <input
+                id="inventoryQuantity"
+                type="number"
+                name="inventoryQuantity"
+                min="0"
+                step="1"
+                required
+                value={newProduct.inventoryQuantity}
+                onChange={(e) =>
+                    setNewProduct({
+                    ...newProduct,
+                    inventoryQuantity: e.target.value
+                    })
+                }
+                className="mt-1 block w-full rounded-md border border-red-400/40 px-3 py-2 shadow-sm focus:border-red-400 focus:outline-none focus:ring-1 focus:ring-red-500"
+                placeholder="Number of items in stock"
                 />
+
 
                 {/* <label htmlFor="name" className='block text-sm font-medium text-gray-300'>Product Category</label> */}
                 <select

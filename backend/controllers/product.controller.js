@@ -42,6 +42,15 @@ export const getFeaturedProducts = async (req, res) => {
 export const createProduct = async (req, res) => {
     try {
         const { name, description, price, inventoryQuantity, image, category} = req.body;
+
+        const quantity = Number(inventoryQuantity);
+
+        if (!Number.isSafeInteger(quantity) || quantity < 0) {
+        return res.status(400).json({
+            message: "Inventory quantity must be a non-negative whole number",
+        });
+        }
+
         let cloudinaryResponse = null;
 
         if(image) {
@@ -52,7 +61,7 @@ export const createProduct = async (req, res) => {
             name,
             description,
             price,
-            inventoryQuantity,
+            inventoryQuantity: quantity,
             image: cloudinaryResponse?.secure_url ?  cloudinaryResponse.secure_url : "",
             category
         });
