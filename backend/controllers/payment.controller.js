@@ -4,11 +4,16 @@ import mongoose from "mongoose";
 import Coupon from "../models/coupon.model.js";
 import Order from "../models/order.model.js";
 import Product from "../models/product.model.js";
+import { redis } from "../lib/redis.js";
 
 export const demoCheckout = async (req, res) => {
   try {
     const { products, couponCode, demoReference } = req.body;
     const userId = req.user._id;
+
+    
+
+
 
     if (
       typeof demoReference !== "string" ||
@@ -130,44 +135,101 @@ export const demoCheckout = async (req, res) => {
     const totalAmount = totalCents / 100;
 
     // This records a simulation, not a verified payment.
-    const order = await Order.create({
-      user: userId,
-      products: orderProducts,
-      totalAmount,
-      paymentMethod: "demo",
-      paymentStatus: "simulated",
-      demoReference,
-    });
+        let order;
 
-    if (appliedCoupon) {
-      await Coupon.updateOne(
-        { _id: appliedCoupon._id },
-        { $set: { isActive: false } }
-      );
+    try {
+      await mongoose.connection.transaction(async (session) => {
+        // Deduct stock for every purchased product
+        for (const item of orderProducts) {
+          const updatedProduct = await Product.findOneAndUpdate(
+            {
+              _id: item.product,
+              inventoryQuantity: { $gte: item.quantity },
+              isVisible: { $ne: false },
+            },
+            {
+              $inc: { inventoryQuantity: -item.quantity },
+            },
+            { new: true, session }
+          );
+
+          if (!updatedProduct) {
+            throw new Error(
+              "INSUFFICIENT_STOCK"
+            );
+          }
+        }
+
+        // Create the order in the same transaction
+        const [createdOrder] = await Order.create(
+          [
+            {
+              user: userId,
+              products: orderProducts,
+              totalAmount,
+              paymentMethod: "demo",
+              paymentStatus: "simulated",
+              demoReference,
+            },
+          ],
+          { session }
+        );
+
+        order = createdOrder;
+      });
+    } catch (error) {
+      if (error.message === "INSUFFICIENT_STOCK") {
+        return res.status(409).json({
+          message: "Some items are sold out or no longer available.",
+        });
+      }
+
+      throw error;
     }
 
-    // Reward demo orders worth $200 or more.
-    let newCoupon = null;
+    try {
+        await redis.del("featuredProducts");
+      } catch (error) {
+        console.error("Failed to refresh featured products cache:", error);
+      }
 
-    if (totalCents >= 20000) {
-      const code =
-        "GIFT" + crypto.randomBytes(4).toString("hex").toUpperCase();
+      let newCoupon = null;
+      try {
+        if (appliedCoupon) {
+          await Coupon.updateOne(
+            { _id: appliedCoupon._id },
+            { $set: { isActive: false } }
+          );
+        }
 
-      newCoupon = await Coupon.findOneAndUpdate(
-        { userId },
-        {
-          $set: {
-            code,
-            discountPercentage: 10,
-            isActive: true,
-            expirationDate: new Date(
-              Date.now() + 30 * 24 * 60 * 60 * 1000
-            ),
-          },
-        },
-        { upsert: true, new: true, runValidators: true }
-      );
-    }
+        // Reward demo orders worth $200 or more.
+        
+
+        if (totalCents >= 20000) {
+          const code =
+            "GIFT" + crypto.randomBytes(4).toString("hex").toUpperCase();
+
+          newCoupon = await Coupon.findOneAndUpdate(
+            { userId },
+            {
+              $set: {
+                code,
+                discountPercentage: 10,
+                isActive: true,
+                expirationDate: new Date(
+                  Date.now() + 30 * 24 * 60 * 60 * 1000
+                ),
+              },
+            },
+            { upsert: true, new: true, runValidators: true }
+          );
+        }
+    } catch (couponError) {
+  console.error(
+    "Order saved, but coupon processing failed:",
+    couponError
+  );
+}
 
     return res.status(200).json({
       success: true,
@@ -185,8 +247,22 @@ export const demoCheckout = async (req, res) => {
     message: error.message,
 });
     if (error.code === 11000) {
+      const existingOrder = await Order.findOne({
+        demoReference: req.body.demoReference,
+        user: req.user._id,
+      });
+
+      if (existingOrder) {
+        return res.status(200).json({
+          success: true,
+          orderId: existingOrder._id,
+          totalAmount: existingOrder.totalAmount,
+          demoReference: existingOrder.demoReference,
+        });
+      }
+
       return res.status(409).json({
-        message: "Duplicate checkout reference. Check order history.",
+        message: "Checkout reference already exists.",
       });
     }
 

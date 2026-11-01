@@ -1,4 +1,5 @@
 import Product from '../models/product.model.js';
+import User from "../models/user.model.js";
 
 export const getCartProducts = async (req, res) => {
     try {
@@ -98,34 +99,38 @@ export const addToCart = async (req, res) => {
 
 
 export const removeAllFromCart = async (req, res) => {
-    try {
-        const { productId } = req.body ?? {};
-        const user = req.user;
+  try {
+    const { productId } = req.body ?? {};
 
-        if (!productId) {
-            user.cartItems = [];
-        } else {
-            user.cartItems = user.cartItems.filter(
-                item =>
-                    item.product.toString() !== productId.toString()
-            );
+    const update = productId
+      ? {
+          $pull: {
+            cartItems: { product: productId }
+          }
         }
+      : {
+          $set: { cartItems: [] }
+        };
 
-        await user.save();
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      update,
+      { returnDocument: "after" }
+    );
 
-        res.json(user.cartItems);
-
-    } catch (error) {
-        console.error(
-            "Error in removeAllFromCart controller:",
-            error.message
-        );
-
-        res.status(500).json({
-            message: "Server error",
-            error: error.message
-        });
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found"
+      });
     }
+
+    res.json(user.cartItems);
+  } catch (error) {
+    console.error("Error clearing cart:", error);
+    res.status(500).json({
+      message: "Failed to clear cart"
+    });
+  }
 };
 
 
