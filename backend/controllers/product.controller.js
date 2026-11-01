@@ -121,6 +121,7 @@ export const getRecommendedProducts = async (req, res) => {
         res.status(500).json({message: "Server error", error:error.message});
     }
 };
+
 export const getHomePageProducts = async (req, res) => {
     try {
         const products = await Product.aggregate([
@@ -179,4 +180,43 @@ async function updateFeaturedProductsCache() {
     } catch (error) {
         console.error("Error updating featured products cache:", error.message);
     }
+};
+
+export const updateProductStock = async (req, res) => {
+  try {
+    const { inventoryQuantity } = req.body;
+    const quantity = Number(inventoryQuantity);
+
+    if (
+      !Number.isSafeInteger(quantity) ||
+      quantity < 0 ||
+      inventoryQuantity === "" ||
+      inventoryQuantity == null
+    ) {
+      return res.status(400).json({
+        message: "Stock must be a non-negative whole number",
+      });
+    }
+
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { inventoryQuantity: quantity },
+      { new: true, runValidators: true }
+    );
+
+    if (!product) {
+      return res.status(404).json({
+        message: "Product not found",
+      });
+    }
+
+    await redis.del("featuredProducts");
+
+    res.json(product);
+  } catch (error) {
+    console.error("Error updating stock:", error);
+    res.status(500).json({
+      message: "Failed to update stock",
+    });
+  }
 };

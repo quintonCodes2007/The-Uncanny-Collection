@@ -49,6 +49,29 @@ export const useProductStore = create((set) => ({
         }
     },
 
+    updateProductStock: async (productId, quantity) => {
+        try {
+            const res = await axios.patch(
+            `/products/${productId}/stock`,
+            { inventoryQuantity: quantity }
+            );
+
+            set((state) => ({
+            products: state.products.map((product) =>
+                product._id === productId ? res.data : product
+            ),
+            }));
+
+            toast.success("Stock updated successfully");
+            return true;
+        } catch (error) {
+            toast.error(
+            error.response?.data?.message || "Failed to update stock"
+            );
+            return false;
+        }
+        },
+
     deleteProduct: async (productId) => {
         set({ loading: true });
         try {
