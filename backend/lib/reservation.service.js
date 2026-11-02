@@ -4,12 +4,17 @@ import Reservation from "../models/reservation.model.js";
 import { getReservationExpiry } from "./reservation.config.js";
 
 
-export const reserveStock = async (userId, productId, quantity) => {
+export const reserveStock = async (
+  userId,
+  productId,
+  quantity,
+  session
+) => {
   if (!Number.isSafeInteger(quantity) || quantity < 1) {
     throw new Error("Invalid reservation quantity");
   }
 
-  return mongoose.connection.transaction(async (session) => {
+  
     // Check for an existing active reservation
     const existingReservation = await Reservation.findOne({
       user: userId,
@@ -18,8 +23,10 @@ export const reserveStock = async (userId, productId, quantity) => {
     }).session(session);
 
     if (existingReservation) {
-      throw new Error("Product already reserved");
-    }
+        throw new Error(
+            "An active reservation already exists. Use updateReservedQuantity."
+        );
+        }
 
     // Atomically deduct available inventory
     const product = await Product.findOneAndUpdate(
@@ -56,7 +63,7 @@ export const reserveStock = async (userId, productId, quantity) => {
     );
 
     return reservation;
-  });
+  
 };
 
 export const releaseReservation = async (reservationId) => {
@@ -98,13 +105,14 @@ export const releaseReservation = async (reservationId) => {
 export const updateReservedQuantity = async (
   userId,
   productId,
-  newQuantity
+  newQuantity,
+  session
 ) => {
   if (!Number.isSafeInteger(newQuantity) || newQuantity < 0) {
     throw new Error("Invalid reservation quantity");
   }
 
-  return mongoose.connection.transaction(async (session) => {
+  
     const reservation = await Reservation.findOne({
       user: userId,
       product: productId,
@@ -152,11 +160,20 @@ export const updateReservedQuantity = async (
       return null;
     }
 
-    reservation.quantity = newQuantity;
-    await reservation.save({ session });
+    await Reservation.updateOne(
+        {
+            _id: reservation._id,
+            status: "active",
+            expiresAt: { $gt: new Date() },
+        },
+        {
+            $set: { quantity: newQuantity },
+        },
+        { session }
+        );
 
     return reservation;
-  });
+  
 };
 
 export const expireReservations = async () => {
@@ -190,6 +207,16 @@ export const expireReservations = async () => {
         },
         { session }
       );
+
+      await mongoose.model("User").updateOne(
+        { _id: reservation.user },
+        {
+            $pull: {
+            cartItems: { product: reservation.product },
+            },
+        },
+        { session }
+        );
 
       expiredCount++;
     });

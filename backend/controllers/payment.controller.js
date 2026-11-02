@@ -5,6 +5,7 @@ import Coupon from "../models/coupon.model.js";
 import Order from "../models/order.model.js";
 import Product from "../models/product.model.js";
 import { redis } from "../lib/redis.js";
+import Reservation from "../models/reservation.model.js";
 
 export const demoCheckout = async (req, res) => {
   try {
@@ -141,22 +142,25 @@ export const demoCheckout = async (req, res) => {
       await mongoose.connection.transaction(async (session) => {
         // Deduct stock for every purchased product
         for (const item of orderProducts) {
-          const updatedProduct = await Product.findOneAndUpdate(
+          const reservation = await Reservation.findOneAndUpdate(
             {
-              _id: item.product,
-              inventoryQuantity: { $gte: item.quantity },
-              isVisible: { $ne: false },
+              user: userId,
+              product: item.product,
+              quantity: item.quantity,
+              status: "active",
+              expiresAt: { $gt: new Date() },
             },
             {
-              $inc: { inventoryQuantity: -item.quantity },
+              $set: { status: "completed" },
             },
-            { new: true, session }
+            {
+              session,
+              returnDocument: "after",
+            }
           );
 
-          if (!updatedProduct) {
-            throw new Error(
-              "INSUFFICIENT_STOCK"
-            );
+          if (!reservation) {
+            throw new Error("RESERVATION_INVALID");
           }
         }
 
@@ -173,11 +177,19 @@ export const demoCheckout = async (req, res) => {
             },
           ],
           { session }
-        );
+        ); 
+        
 
         order = createdOrder;
       });
     } catch (error) {
+
+      if (error.message === "RESERVATION_INVALID") {
+  return res.status(409).json({
+    message: "Your cart reservation has expired or is unavailable.",
+  });
+}
+
       if (error.message === "INSUFFICIENT_STOCK") {
         return res.status(409).json({
           message: "Some items are sold out or no longer available.",
