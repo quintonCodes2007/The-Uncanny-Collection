@@ -47,22 +47,23 @@ export const useCartStore = create((set, get) => ({
     },
 
 
-    addToCart: async (product) => {
-      try {
-        await axios.post('/cart', { productId: product._id });
-          toast.success('Item added to cart');
-          set((prevState) => {
-              const existingItem = prevState.cartItems.find(item => item._id === product._id);
-              const newCartItems = existingItem
-                  ? prevState.cartItems.map(item => item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item)
-                  : [...prevState.cartItems, { ...product, quantity: 1 }];
-              return { cartItems: newCartItems };
-          });
-          get().calculateTotal();
-      } catch (error) {
-        toast.error(error.response.data.message || 'Error adding item to cart');
-      }
-    },
+addToCart: async (product) => {
+  try {
+    await axios.post("/cart", {
+      productId: product._id,
+    });
+
+    // Refresh cart with the actual reservation expiry
+    await get().getCartItems();
+
+    toast.success("Item added to cart");
+  } catch (error) {
+    toast.error(
+      error.response?.data?.message ||
+      "Error adding item to cart"
+    );
+  }
+},
 
 
 

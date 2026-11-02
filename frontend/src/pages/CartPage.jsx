@@ -6,11 +6,35 @@ import CartItem from '../components/CartItem';
 import PeopleAlsoBought from '../components/PeopleAlsoBought';
 import OrderSummary from '../components/OrderSummary';
 import GiftCouponCard from '../components/GiftCouponCard';
+import { useEffect } from "react";
+import ReservationCountdown from "../components/ReservationCountdown";
 
 const CartPage = () => {
 
 const { cartItems } = useCartStore();
   console.log("CART:", cartItems);
+
+  const getCartItems = useCartStore((state) => state.getCartItems);
+
+    useEffect(() => {
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === "visible") {
+          getCartItems();
+        }
+      };
+
+      document.addEventListener(
+        "visibilitychange",
+        handleVisibilityChange
+      );
+
+      return () => {
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange
+        );
+      };
+    }, [getCartItems]);
 
   return (
     <div className='py-8 md:py-1'>
@@ -25,8 +49,14 @@ const { cartItems } = useCartStore();
             {cartItems?.length === 0 ? (
               <EmptyCartUI />
             ) : (
-              <div className='space-y-6'>
-                {cartItems?.map((item) => (
+              <div className="space-y-6">
+                <ReservationCountdown
+                  cartItems={cartItems}
+                  onExpire={getCartItems}
+                  durationMinutes={1}
+                />
+
+                {cartItems.map((item) => (
                   <CartItem key={item._id} item={item} />
                 ))}
               </div>

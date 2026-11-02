@@ -12,6 +12,7 @@ import CheckoutPage from "./pages/CheckoutPage";
 import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
 import PurchaseCancelPage from "./pages/PurchaseCancelPage";
 import PurchaseFailedPage from "./pages/PurchaseFailedPage";
+import ScrollToTop from "./components/ScrollToTop";
 
 import { useUserStore } from "./stores/useUserStore";
 import { useCartStore } from "./stores/useCartStore";
@@ -41,12 +42,18 @@ useEffect(() => {
     return <LoadingSpinner />;
   }
 
-  if (pathname === '/checkout') {
-    return user ? <CheckoutPage /> : <Navigate to='/login' replace />;
+  if (pathname === "/checkout") {
+    return (
+      <>
+        <ScrollToTop />
+        {user ? <CheckoutPage /> : <Navigate to="/login" replace />}
+      </>
+    );
   }
 
   return (
     <div className="layout-wrapper">
+      <ScrollToTop />
       <div className="bg-glow-overlay pointer-events-none"/>
       <div className="relative z-50 pt-20"/>
       

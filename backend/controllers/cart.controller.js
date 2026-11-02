@@ -7,39 +7,49 @@ import Reservation from "../models/reservation.model.js";
 import { reserveStock, updateReservedQuantity, } from "../lib/reservation.service.js";
 
 export const getCartProducts = async (req, res) => {
-    try {
-        await expireReservations();
-        const products = await Product.find({
-            _id: {
-                $in: req.user.cartItems.map(item => item.product)
-            }
-        });
+  try {
+    await expireReservations();
 
-        const cartItems = products.map((product) => {
-            const item = req.user.cartItems.find(
-                cartItem =>
-                    cartItem.product.toString() === product._id.toString()
-            );
+    const products = await Product.find({
+      _id: {
+        $in: req.user.cartItems.map((item) => item.product),
+      },
+    });
 
-            return {
-                ...product.toJSON(),
-                quantity: item.quantity
-            };
-        });
+    // Fetch reservations BEFORE products.map()
+    const reservations = await Reservation.find({
+      user: req.user._id,
+      status: "active",
+      expiresAt: { $gt: new Date() },
+    });
 
-        res.json(cartItems);
+    const reservationMap = new Map(
+      reservations.map((reservation) => [
+        reservation.product.toString(),
+        reservation.expiresAt,
+      ])
+    );
 
-    } catch (error) {
-        console.error(
-            "Error in getCartProducts controller:",
-            error.message
-        );
+    const cartItems = products.map((product) => {
+      const item = req.user.cartItems.find(
+        (cartItem) =>
+          cartItem.product.toString() === product._id.toString()
+      );
 
-        res.status(500).json({
-            message: "Server error",
-            error: error.message
-        });
-    }
+      return {
+        ...product.toJSON(),
+        quantity: item.quantity,
+        expiresAt: reservationMap.get(product._id.toString()) ?? null,
+      };
+    });
+
+    res.json(cartItems);
+  } catch (error) {
+    console.error("Error fetching cart:", error);
+    res.status(500).json({
+      message: "Failed to fetch cart items",
+    });
+  }
 };
 
 export const addToCart = async (req, res) => {
