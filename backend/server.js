@@ -11,6 +11,8 @@ import couponRoutes from './routes/coupon.route.js';
 import paymentRoutes from './routes/payment.route.js';
 import analyticsRoutes from './routes/analytics.route.js';
 
+import { startReservationScheduler } from "./lib/reservation.scheduler.js";
+
 import { connectDB } from './lib/db.js';
 
 dotenv.config();
@@ -39,10 +41,16 @@ if(process.env.NODE_ENV === "production") {
 }
 
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+const startServer = async () => {
+  await connectDB();
 
-  connectDB();  
-});
+  startReservationScheduler();
+
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+};
+
+startServer();
 
 

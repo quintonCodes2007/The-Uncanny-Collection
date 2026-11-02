@@ -37,13 +37,15 @@ export const useCartStore = create((set, get) => ({
     },
 
     getCartItems: async () => {
-        try {
-            const response = await axios.get('/cart');
-            set({cartItems: response.data});
-            get().calculateTotal();
-        } catch (error) {
-            toast.error(error.response.data.message || 'Error fetching cart items');
-        }
+      try {
+        const response = await axios.get("/cart");
+        console.log("🌕 Refreshed cart:", response.data);
+
+        set({ cartItems: response.data });
+        get().calculateTotal();
+      } catch (error) {
+        console.error("Failed to refresh cart:", error);
+      }
     },
 
 

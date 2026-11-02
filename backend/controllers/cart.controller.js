@@ -10,11 +10,18 @@ export const getCartProducts = async (req, res) => {
   try {
     await expireReservations();
 
-    const products = await Product.find({
-      _id: {
-        $in: req.user.cartItems.map((item) => item.product),
-      },
-    });
+      // Fetch the latest cart directly from MongoDB
+      const user = await User.findById(req.user._id);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const products = await Product.find({
+        _id: {
+          $in: user.cartItems.map((item) => item.product),
+        },
+      });
 
     // Fetch reservations BEFORE products.map()
     const reservations = await Reservation.find({
@@ -31,7 +38,7 @@ export const getCartProducts = async (req, res) => {
     );
 
     const cartItems = products.map((product) => {
-      const item = req.user.cartItems.find(
+      const item = user.cartItems.find(
         (cartItem) =>
           cartItem.product.toString() === product._id.toString()
       );

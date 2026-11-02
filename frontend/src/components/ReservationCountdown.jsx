@@ -24,25 +24,33 @@ const ReservationCountdown = ({
 
   const [secondsLeft, setSecondsLeft] = useState(getRemainingTime);
 
-  useEffect(() => {
-    let expiryHandled = false;
+useEffect(() => {
+  let expiryHandled = false;
+  let refreshing = false;
 
-    const updateCountdown = () => {
-      const remaining = getRemainingTime();
-      setSecondsLeft(remaining);
+  const updateCountdown = async () => {
+    const remaining = getRemainingTime();
+    setSecondsLeft(remaining);
 
-      if (remaining === 0 && !expiryHandled) {
-        expiryHandled = true;
-        onExpire?.();
+    if (remaining === 0 && !expiryHandled && !refreshing) {
+      refreshing = true;
+
+      try {
+        await onExpire?.();
+      } catch (error) {
+        console.error("Failed to refresh cart:", error);
+      } finally {
+        refreshing = false;
       }
-    };
+    }
+  };
 
-    updateCountdown();
+  updateCountdown();
 
-    const interval = setInterval(updateCountdown, 1000);
+  const interval = setInterval(updateCountdown, 1000);
 
-    return () => clearInterval(interval);
-  }, [cartItems, onExpire]);
+  return () => clearInterval(interval);
+}, [cartItems, onExpire]);
 
   const minutes = Math.floor((secondsLeft ?? 0) / 60);
   const seconds = (secondsLeft ?? 0) % 60;

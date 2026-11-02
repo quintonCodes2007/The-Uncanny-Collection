@@ -53,7 +53,7 @@ const { cartItems } = useCartStore();
                 <ReservationCountdown
                   cartItems={cartItems}
                   onExpire={getCartItems}
-                  durationMinutes={1}
+                  durationMinutes={15}
                 />
 
                 {cartItems.map((item) => (

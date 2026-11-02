@@ -1,4 +1,4 @@
-export const RESERVATION_DURATION_MINUTES = 1;
+export const RESERVATION_DURATION_MINUTES = 15;
 
 export const getReservationExpiry = () => {
   return new Date(
