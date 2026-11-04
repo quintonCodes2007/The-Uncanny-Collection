@@ -238,3 +238,37 @@ export const updateProductStock = async (req, res) => {
     });
   }
 };
+
+export const searchProducts = async (req, res) => {
+  try {
+    const query = req.query.q?.trim();
+
+    if (!query || query.length < 2 || query.length > 100) {
+      return res.status(400).json({
+        message: "Search must contain between 2 and 100 characters",
+      });
+    }
+
+    // Escape special characters for safe regex searching
+    const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    const products = await Product.find({
+      $or: [
+        { name: { $regex: escapedQuery, $options: "i" } },
+        { description: { $regex: escapedQuery, $options: "i" } },
+      ],
+      isVisible: { $ne: false },
+      inventoryQuantity: { $gt: 0 },
+    })
+      .limit(30)
+      .lean();
+
+    return res.status(200).json(products);
+  } catch (error) {
+    console.error("Product search error:", error);
+
+    return res.status(500).json({
+      message: "Failed to search products",
+    });
+  }
+};

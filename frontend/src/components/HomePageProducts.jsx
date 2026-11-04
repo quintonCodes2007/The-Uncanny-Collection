@@ -30,19 +30,42 @@ const HomePageProducts = () => {
   if (isLoading) return <LoadingSpinner />;
 
 
-  return  (<div className='mt-20'>
-    <h1 className='text-center text-3xl font-bold sm:text-5xl lg:text-6xl text-red-400 mb-4'>Discover Something Uncanny</h1>
-    
+return (
+  <section className="mt-6 w-full min-w-0">
+    {/* Section heading */}
+    <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <h2 className="text-xl font-bold text-red-400 sm:text-2xl">
+          Recommended for Your Downfall
+        </h2>
 
-<div className="mt-6 grid grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
-  {homepageProducts?.map((product) => (
-    <ProductCard key={product._id} product={product} />
-  ))}
-</div>
+        <p className="mt-1 text-xs text-gray-400 sm:text-sm">
+          Handpicked artifacts that seem to have a mind of their own.
+        </p>
+      </div>
 
+      <span className="text-xs text-red-400">
+        More cursed discoveries await...
+      </span>
+    </div>
 
-
-  </div>);
+    {/* Product recommendations */}
+    {homepageProducts.length > 0 ? (
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {homepageProducts.slice(0, 5).map((product) => (
+          <ProductCard
+            key={product._id}
+            product={product}
+          />
+        ))}
+      </div>
+    ) : (
+      <p className="py-8 text-center text-sm text-gray-400">
+        No cursed artifacts available right now.
+      </p>
+    )}
+  </section>
+);
 }
 
 export default HomePageProducts

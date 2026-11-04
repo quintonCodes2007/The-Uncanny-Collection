@@ -20,7 +20,7 @@ const handleSubmit = (e) => {
 
   return (
 
-    <div className='flex flex-col justify-center py-1 sm:px-6 lg:px-8'>
+    <div className='flex flex-col justify-center py-13 sm:px-6 lg:px-8'>
       <motion.div
       className='sm:mx-auto sm:w-full max-w-md'
       initial={{ opacity: 0, y: -20 }}
