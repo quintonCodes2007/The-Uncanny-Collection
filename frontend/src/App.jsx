@@ -13,6 +13,7 @@ import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
 import PurchaseCancelPage from "./pages/PurchaseCancelPage";
 import PurchaseFailedPage from "./pages/PurchaseFailedPage";
 import ScrollToTop from "./components/ScrollToTop";
+import SearchResultsPage from "./pages/SearchResultsPage";
 
 import { useUserStore } from "./stores/useUserStore";
 import { useCartStore } from "./stores/useCartStore";
@@ -71,6 +72,8 @@ useEffect(() => {
         <Route path="/purchase-success" element= {user ? <PurchaseSuccessPage />: <Navigate to='/login'/>} />
         <Route path="/purchase-failed"element={<PurchaseFailedPage />} />
         <Route path="/purchase-cancel" element= {user ? <PurchaseCancelPage />: <Navigate to='/login'/>} />
+        <Route path="/search" element={<SearchResultsPage />}
+      />
 
       </Routes>
       </main>
