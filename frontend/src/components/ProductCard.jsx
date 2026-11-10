@@ -3,6 +3,8 @@ import { ShoppingCart, Heart, Star, Flame, Tag } from 'lucide-react';
 import { useUserStore } from '../stores/useUserStore.js';
 import { useCartStore } from '../stores/useCartStore.js';
 
+import CurrencyPrice from "./CurrencyPrice";
+
 const ProductCard = ({ product }) => {
     const { user } = useUserStore();
     const { addToCart } = useCartStore();
@@ -104,15 +106,16 @@ const ProductCard = ({ product }) => {
           <div className="mt-auto pt-3">
             <div className="flex flex-wrap items-center justify-between gap-1">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-white sm:text-base">
-                  N${product.price.toFixed(2)}
-                </span>
+                <CurrencyPrice
+                    amount={product.price}
+                    className="text-sm font-bold text-white sm:text-base"
+                  />
 
                 {product.originalPrice > product.price && (
-                  <span className="text-[10px] text-gray-500 line-through">
-                    N${product.originalPrice.toFixed(2)}
-                  </span>
-                )}
+                    <span className="text-[10px] text-gray-500 line-through">
+                      <CurrencyPrice amount={product.originalPrice} />
+                    </span>
+                  )}
               </div>
 
               <span

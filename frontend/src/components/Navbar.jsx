@@ -16,6 +16,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useUserStore } from "../stores/useUserStore";
 import { useCartStore } from "../stores/useCartStore";
 
+import CurrencySelector from "./CurrencySelector";
+
 const Navbar = () => {
   const { user, logout } = useUserStore();
   const { cartItems } = useCartStore();
@@ -104,13 +106,9 @@ const Navbar = () => {
         </form>
 
         {/* Currency selector */}
-        <div className="ml-auto hidden items-center gap-2 text-sm text-gray-200 lg:flex">
-          <Globe size={19} className="text-red-400" />
-
-          <span className="font-medium">NAD</span>
-
-          <ChevronDown size={15} className="text-gray-400" />
-        </div>
+          <div className="ml-auto hidden lg:block">
+            <CurrencySelector />
+          </div>
 
         {/* Wishlist */}
           <button
