@@ -1,10 +1,14 @@
 import { redis } from '../lib/redis.js';
 import cloudinary from '../lib/cloudinary.js';
 import Product from '../models/product.model.js';
+import Category from "../models/category.model.js";
+import mongoose from "mongoose";
 
 export const getAllProducts = async (req, res) => {
     try {
-        const products = await Product.find({});//find all products in the database
+        const products = await Product.find({})
+        .populate("category", "name slug")
+        .lean();
         res.json({products});
     } catch (error) {
         console.log("Error in getAllProducts controller:", error.message);
@@ -43,39 +47,94 @@ export const getFeaturedProducts = async (req, res) => {
 
 };
 
+
 export const createProduct = async (req, res) => {
-    try {
-        const { name, description, price, inventoryQuantity, image, category} = req.body;
+  try {
+    const {
+      name,
+      description,
+      price,
+      inventoryQuantity,
+      image,
+      category,
+    } = req.body;
 
-        const quantity = Number(inventoryQuantity);
+    const quantity = Number(inventoryQuantity);
 
-        if (!Number.isSafeInteger(quantity) || quantity < 0) {
-        return res.status(400).json({
-            message: "Inventory quantity must be a non-negative whole number",
-        });
-        }
-
-        let cloudinaryResponse = null;
-
-        if(image) {
-            cloudinaryResponse = await cloudinary.uploader.upload(image, {folder: "products"});
-        }
-
-        const product = await Product.create({
-            name,
-            description,
-            price,
-            inventoryQuantity: quantity,
-            image: cloudinaryResponse?.secure_url ?  cloudinaryResponse.secure_url : "",
-            category
-        });
-
-        res.status(201).json(product);
-    } catch (error) {
-        console.log("Error in createProduct controller:", error.message);
-        res.status(500).json({message: "Server error", error:error.message});
+    if (!Number.isSafeInteger(quantity) || quantity < 0) {
+      return res.status(400).json({
+        message: "Inventory must be a non-negative whole number",
+      });
     }
+
+    if (!mongoose.isValidObjectId(category)) {
+      return res.status(400).json({
+        message: "Please select a valid product category",
+      });
+    }
+
+    const existingCategory = await Category.findOne({
+      _id: category,
+      isActive: true,
+    });
+
+    if (!existingCategory) {
+      return res.status(404).json({
+        message: "Selected category does not exist",
+      });
+    }
+
+    if (!name?.trim() || !description?.trim()) {
+      return res.status(400).json({
+        message: "Product name and description are required",
+      });
+    }
+
+    const numericPrice = Number(price);
+
+    if (
+      price === "" ||
+      price == null ||
+      !Number.isFinite(numericPrice) ||
+      numericPrice < 0
+    ) {
+      return res.status(400).json({
+        message: "Please enter a valid product price",
+      });
+    }
+
+    if (!image) {
+      return res.status(400).json({
+        message: "Product image is required",
+      });
+    }
+
+    const cloudinaryResponse = await cloudinary.uploader.upload(
+      image,
+      { folder: "products" }
+    );
+
+    const product = await Product.create({
+      name: name.trim(),
+      description: description.trim(),
+      price: numericPrice,
+      inventoryQuantity: quantity,
+      image: cloudinaryResponse.secure_url,
+      category: existingCategory._id,
+    });
+
+    await product.populate("category", "name slug");
+
+    return res.status(201).json(product);
+  } catch (error) {
+    console.error("Error creating product:", error);
+
+    return res.status(500).json({
+      message: "Failed to create product",
+    });
+  }
 };
+
 
 export const deleteProduct = async (req, res) => {
     try {
@@ -155,20 +214,48 @@ export const getHomePageProducts = async (req, res) => {
     }
 };
 
+
 export const getProductsByCategory = async (req, res) => {
-    try {
-        const { category } = req.params;
-        const products = await Product.find({
-            category,
-            isVisible: { $ne: false },
-            inventoryQuantity: { $gt: 0 }
-            });
-        res.json({products});
-    } catch (error) {
-        console.error("Error in getProductsByCategory controller:", error.message);
-        res.status(500).json({message: "Server error", error:error.message});
+  try {
+    const { category: slug } = req.params;
+
+    const category = await Category.findOne({
+      slug,
+      isActive: true,
+    });
+
+    if (!category) {
+      return res.status(404).json({
+        message: "Category not found",
+        products: [],
+      });
     }
+
+    const products = await Product.find({
+      category: category._id,
+      isVisible: { $ne: false },
+      inventoryQuantity: { $gt: 0 },
+    })
+      .populate("category", "name slug")
+      .lean();
+
+    return res.status(200).json({
+      category: {
+        _id: category._id,
+        name: category.name,
+        slug: category.slug,
+      },
+      products,
+    });
+  } catch (error) {
+    console.error("Error fetching category products:", error);
+
+    return res.status(500).json({
+      message: "Failed to fetch category products",
+    });
+  }
 };
+
 
 export const toggleFeaturedProduct = async (req, res) => {
     try {

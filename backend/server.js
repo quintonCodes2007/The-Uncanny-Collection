@@ -5,6 +5,7 @@ import path from "node:path";
 
 
 import authRoutes from './routes/auth.route.js';
+import categoryRoutes from "./routes/category.route.js";
 import productRoutes from './routes/product.route.js';
 import cartRoutes from './routes/cart.route.js';
 import couponRoutes from './routes/coupon.route.js';
@@ -31,6 +32,7 @@ app.use("/api/cart", cartRoutes)
 app.use("/api/coupons", couponRoutes)
 app.use("/api/payments", paymentRoutes)
 app.use("/api/analytics", analyticsRoutes)
+app.use("/api/categories", categoryRoutes);
 
 if(process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, '/frontend/dist')));

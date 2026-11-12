@@ -1,24 +1,60 @@
 import React from 'react'
-import { useState } from 'react';
+
 import { motion } from 'framer-motion';
 import { PlusCircle, Upload, Loader } from 'lucide-react';
 import { useProductStore } from '../stores/useProductStore';
+import { useState, useEffect } from "react";
+import axios from "../lib/axios";
+import toast from "react-hot-toast";
 
 
-const categories = ['Organs', 'Cursed Artifacts', 'Forbidden Library', 'Creepy Collectibles', 'Paranormal', "Witches' Apothecary", 'The \"Questionable\" Shelf', 'Lost & Found (Definitely Not Stolen)'];
+
 
 const CreateProductsForm = () => {
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
-    const [newProduct, setNewProduct] = useState({
-        name: '',
-        description: '',
-        price: '',
-        inventoryQuantity: '',
-        category: '',
-        image: '',
-    });
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    description: "",
+    price: "",
+    inventoryQuantity: "",
+    category: "",
+    image: "",
+  });
 
-    const { createProduct, loading} = useProductStore();
+  const { createProduct, loading } = useProductStore();
+
+  // Fetch categories from MongoDB when the form opens
+  useEffect(() => {
+    let active = true;
+
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get("/categories");
+
+        if (active) {
+          setCategories(response.data.categories || []);
+        }
+      } catch (error) {
+        console.error("Failed to load categories:", error);
+        toast.error("Could not load product categories");
+      } finally {
+        if (active) {
+          setCategoriesLoading(false);
+        }
+      }
+    };
+
+    fetchCategories();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+
+
 
     const handleSubmit = async(e) => {
         e.preventDefault();
@@ -114,21 +150,37 @@ const CreateProductsForm = () => {
 
 
                 {/* <label htmlFor="name" className='block text-sm font-medium text-gray-300'>Product Category</label> */}
+                
                 <select
-                    id='category'
-                    name='category'
-                    value={newProduct.category}
-                    onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-                    className='mt-1 text-gray-400 border border-red-400/40 rounded-md  shadow-sm py-2 px-3 focus:border-red-400 focus:ring-1 focus:ring-red-500 focus:outline-none'
-                    required
+                id="category"
+                name="category"
+                value={newProduct.category}
+                onChange={(e) =>
+                    setNewProduct({
+                    ...newProduct,
+                    category: e.target.value,
+                    })
+                }
+                className="mt-1 w-full rounded-md border border-red-400/40 bg-[#21151f] px-3 py-2 text-gray-200 focus:border-red-400 focus:outline-none"
+                required
+                disabled={categoriesLoading || categories.length === 0}
                 >
-                <option className="bg-gray-800 text-red-400" value=''>Select a category</option>
+                <option value="">
+                    {categoriesLoading
+                    ? "Loading categories..."
+                    : "Select a category"}
+                </option>
+
                 {categories.map((category) => (
-                    <option key={category} value={category} className="bg-gray-900 text-red-400">
-                        {category}
+                    <option
+                    key={category._id}
+                    value={category._id}
+                    >
+                    {category.name}
                     </option>
                 ))}
                 </select>
+
 
             </div>
 
