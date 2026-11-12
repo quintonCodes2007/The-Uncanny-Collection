@@ -10,6 +10,7 @@ import CategoryPage from "./pages/CategoryPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
+import MyWishlistPage from "./pages/MyWishlistPage";
 import PurchaseCancelPage from "./pages/PurchaseCancelPage";
 import PurchaseFailedPage from "./pages/PurchaseFailedPage";
 import ScrollToTop from "./components/ScrollToTop";
@@ -72,9 +73,8 @@ useEffect(() => {
         <Route path="/purchase-success" element= {user ? <PurchaseSuccessPage />: <Navigate to='/login'/>} />
         <Route path="/purchase-failed"element={<PurchaseFailedPage />} />
         <Route path="/purchase-cancel" element= {user ? <PurchaseCancelPage />: <Navigate to='/login'/>} />
-        <Route path="/search" element={<SearchResultsPage />}
-      />
-
+        <Route path="/search" element={<SearchResultsPage />} />
+        <Route path="/wishlist" element={ user ? <MyWishlistPage /> : <Navigate to="/login" replace /> } />
       </Routes>
       </main>
     </div>

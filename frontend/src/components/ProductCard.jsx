@@ -5,6 +5,9 @@ import { useCartStore } from '../stores/useCartStore.js';
 
 import CurrencyPrice from "./CurrencyPrice";
 
+import { useNavigate } from "react-router-dom";
+import { useWishlistStore } from "../stores/useWishlistStore";
+
 const ProductCard = ({ product }) => {
     const { user } = useUserStore();
     const { addToCart } = useCartStore();
@@ -18,7 +21,33 @@ const ProductCard = ({ product }) => {
         }
     }
 
-  
+    const navigate = useNavigate();
+
+const userId = user?._id || user?.user?._id;
+
+const {
+  isWishlisted,
+  toggleWishlist,
+} = useWishlistStore();
+
+const wishlisted = isWishlisted(userId, product._id);
+
+const handleWishlist = () => {
+  if (!userId) {
+    toast.error("Sign in to save cursed artifacts!");
+
+    navigate("/login");
+    return;
+  }
+
+  toggleWishlist(userId, product);
+
+  if (wishlisted) {
+    toast.success("Removed from your wishlist");
+  } else {
+    toast.success("Artifact added to your wishlist! ❤️");
+  }
+};
 
 
     return (
@@ -56,12 +85,34 @@ const ProductCard = ({ product }) => {
           ) : null}
 
           {/* Wishlist placeholder */}
-          <span
-            title="Wishlist coming soon"
-            className="absolute right-2 top-2 rounded-full bg-black/65 p-1 text-white"
+          {/* Wishlist button */}
+          <button
+            type="button"
+            onClick={handleWishlist}
+            aria-label={
+              wishlisted
+                ? `Remove ${product.name} from wishlist`
+                : `Add ${product.name} to wishlist`
+            }
+            aria-pressed={wishlisted}
+            title={
+              wishlisted
+                ? "Remove from wishlist"
+                : "Add to wishlist"
+            }
+            className={`absolute right-2 top-2 z-10 rounded-full p-2 transition-all duration-200 hover:scale-110 ${
+              wishlisted
+                ? "bg-red-900/90 text-red-400"
+                : "bg-black/65 text-white hover:text-red-400"
+            }`}
           >
-            <Heart size={17} />
-          </span>
+            <Heart
+              size={19}
+              className={
+                wishlisted ? "fill-red-500 text-red-500" : ""
+              }
+            />
+          </button>
         </div>
 
         {/* Product information */}

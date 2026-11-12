@@ -81,7 +81,7 @@ const Navbar = () => {
         <form
           onSubmit={handleSearch}
           role="search"
-          className="absolute left-1/2 hidden w-full max-w-md -translate-x-1/2 md:flex"
+          className="absolute left-[47%] hidden w-full max-w-sm -translate-x-1/2 md:flex xl:max-w-md"
         >
           <div className="flex w-full overflow-hidden rounded-xl border border-[#76505a] bg-[#271923] focus-within:border-red-500">
             <Search className="my-auto ml-4 shrink-0 text-gray-400" size={20} />
@@ -113,12 +113,18 @@ const Navbar = () => {
         {/* Wishlist */}
           <button
             type="button"
-            aria-label="Wishlist"
-            title="Wishlist — coming soon"
+            onClick={() => {
+              navigate(user ? "/wishlist" : "/login");
+            }}
+            aria-label="My Wishlist"
+            title="My Wishlist"
             className="ml-3 mr-4 hidden items-center gap-2 text-gray-300 transition-colors hover:text-red-400 lg:flex"
           >
             <Heart size={21} />
-            <span className="text-sm font-medium">Wishlist</span>
+
+            <span className="text-sm font-medium">
+              Wishlist
+            </span>
           </button>
 
 
