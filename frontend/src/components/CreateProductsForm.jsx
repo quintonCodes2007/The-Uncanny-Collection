@@ -60,7 +60,16 @@ const CreateProductsForm = () => {
         e.preventDefault();
     try {
          await createProduct(newProduct);
-         setNewProduct({name: '', description: '', price: '', inventoryQuantity: '', category: '', image: ''});
+         setNewProduct({
+  name: "",
+  description: "",
+  price: "",
+  inventoryQuantity: "",
+  category: "",
+  image: "",
+  isHot: false,
+  isNewArrival: false,
+});
     } catch (error) {
         console.error('Error creating product:', error);
     }
@@ -180,6 +189,50 @@ const CreateProductsForm = () => {
                     </option>
                 ))}
                 </select>
+
+
+
+
+{/* Promotional badges */}
+<div className="flex w-full items-center gap-3 whitespace-nowrap">
+  <span className="shrink-0 text-xs font-medium text-gray-300 sm:text-sm">
+    Promotional Badges:
+  </span>
+
+  <label className="flex shrink-0 cursor-pointer items-center gap-1.5 text-xs text-gray-300 sm:text-sm">
+    <span>🔥 Hot</span>
+    <input
+      type="checkbox"
+      name="isHot"
+      checked={newProduct.isHot}
+      onChange={(e) =>
+        setNewProduct((prev) => ({
+          ...prev,
+          isHot: e.target.checked,
+        }))
+      }
+      className="h-4 w-4 cursor-pointer accent-orange-500"
+    />
+  </label>
+
+  <label className="flex shrink-0 cursor-pointer items-center gap-1.5 text-xs text-gray-300 sm:text-sm">
+    <span>✦ New</span>
+    <input
+      type="checkbox"
+      name="isNewArrival"
+      checked={newProduct.isNewArrival}
+      onChange={(e) =>
+        setNewProduct((prev) => ({
+          ...prev,
+          isNewArrival: e.target.checked,
+        }))
+      }
+      className="h-4 w-4 cursor-pointer accent-green-500"
+    />
+  </label>
+</div>
+
+
 
 
             </div>

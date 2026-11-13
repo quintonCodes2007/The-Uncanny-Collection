@@ -51,13 +51,15 @@ export const getFeaturedProducts = async (req, res) => {
 export const createProduct = async (req, res) => {
   try {
     const {
-      name,
-      description,
-      price,
-      inventoryQuantity,
-      image,
-      category,
-    } = req.body;
+  name,
+  description,
+  price,
+  inventoryQuantity,
+  image,
+  category,
+  isHot = false,
+  isNewArrival = false,
+} = req.body;
 
     const quantity = Number(inventoryQuantity);
 
@@ -115,13 +117,15 @@ export const createProduct = async (req, res) => {
     );
 
     const product = await Product.create({
-      name: name.trim(),
-      description: description.trim(),
-      price: numericPrice,
-      inventoryQuantity: quantity,
-      image: cloudinaryResponse.secure_url,
-      category: existingCategory._id,
-    });
+  name: name.trim(),
+  description: description.trim(),
+  price: numericPrice,
+  inventoryQuantity: quantity,
+  image: cloudinaryResponse.secure_url,
+  category: existingCategory._id,
+  isHot: isHot === true,
+  isNewArrival: isNewArrival === true,
+});
 
     await product.populate("category", "name slug");
 
@@ -209,7 +213,7 @@ export const getHomePageProducts = async (req, res) => {
                 inventoryQuantity: 1,
                 isFeatured: 1,
                 isHot: 1,
-                isNew: 1,
+                isNewArrival: 1,
                 rating: 1,
                 reviewCount: 1,
               }

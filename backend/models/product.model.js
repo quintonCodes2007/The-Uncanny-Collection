@@ -40,7 +40,28 @@ const productSchema = new mongoose.Schema({
     isFeatured: {
         type: Boolean,
         default: false,
-    }
+    },
+    isHot: {
+        type: Boolean,
+        default: false,
+        },
+
+    isNewArrival: {
+        type: Boolean,
+        default: false,
+        },
+    rating: {
+        type: Number,
+        min: 0,
+        max: 5,
+        default: 0,
+        },
+
+        reviewCount: {
+        type: Number,
+        min: 0,
+        default: 0,
+        },
 }, { timestamps: true });
 
 const Product = mongoose.model("Product", productSchema);

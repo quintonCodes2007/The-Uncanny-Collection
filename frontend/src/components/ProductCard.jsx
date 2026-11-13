@@ -62,27 +62,66 @@ const handleWishlist = () => {
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
 
-          {/* Promotional badge */}
-          {product.discountPercentage > 0 ? (
-            <span className="absolute left-2 top-2 rounded-md bg-[#982b3b] px-2 py-0.5 text-[10px] font-semibold text-white">
-              <Tag size={11} className="mr-1 inline" />
-              {product.discountPercentage}% Off
-            </span>
-          ) : product.isFeatured ? (
-            <span className="absolute left-2 top-2 rounded-md bg-[#982b3b] px-2 py-0.5 text-[10px] font-semibold text-white">
-              <Star size={11} className="mr-1 inline fill-current" />
-              Featured
-            </span>
-          ) : product.isHot ? (
-            <span className="absolute left-2 top-2 rounded-md bg-[#982b3b] px-2 py-0.5 text-[10px] font-semibold text-white">
-              <Flame size={11} className="mr-1 inline" />
-              Hot
-            </span>
-          ) : product.isNew ? (
-            <span className="absolute left-2 top-2 rounded-md bg-[#982b3b] px-2 py-0.5 text-[10px] font-semibold text-white">
-              New
-            </span>
-          ) : null}
+          
+{/* Promotional badges */}
+<div className="absolute left-2 top-2 z-10 flex flex-row flex-wrap items-center gap-1.5">
+
+  {product.discountPercentage > 0 && (
+    <span className="rounded-md bg-red-800 px-2 py-1 text-[10px] font-semibold text-white">
+      <Tag size={11} className="mr-1 inline" />
+      {product.discountPercentage}% Off
+    </span>
+  )}
+
+  {product.isFeatured && (
+    <span className="rounded-md bg-amber-600 px-2 py-1 text-[10px] font-semibold text-white">
+      <Star size={11} className="mr-1 inline" />
+      Featured
+    </span>
+  )}
+
+  
+{product.isHot && (
+  <span
+    className="
+      inline-flex items-center gap-1
+      rounded-md
+      border border-orange-400/40
+      bg-red-950/70
+      px-2.5 py-1
+      text-[10px] font-bold tracking-wide text-orange-200
+      shadow-[0_0_10px_rgba(249,115,22,0.25)]
+      backdrop-blur-sm
+    "
+  >
+    <span className="text-xs">🔥</span>
+    HOT
+  </span>
+)}
+
+
+  
+{product.isNewArrival && (
+  <span
+    className="
+      inline-flex items-center gap-1
+      rounded-md
+      border border-green-400/40
+      bg-green-950/65
+      px-2.5 py-1
+      text-[10px] font-bold tracking-wide text-green-300
+      shadow-[0_0_10px_rgba(34,197,94,0.25)]
+      backdrop-blur-sm
+    "
+  >
+    <span className="text-xs">✦</span>
+    NEW
+  </span>
+)}
+
+
+</div>
+
 
           {/* Wishlist placeholder */}
           {/* Wishlist button */}

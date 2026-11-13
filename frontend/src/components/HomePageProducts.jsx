@@ -52,7 +52,7 @@ return (
     {/* Product recommendations */}
     {homepageProducts.length > 0 ? (
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {homepageProducts.slice(0, 5).map((product) => (
+        {homepageProducts.slice(0, 20).map((product) => (
           <ProductCard
             key={product._id}
             product={product}
