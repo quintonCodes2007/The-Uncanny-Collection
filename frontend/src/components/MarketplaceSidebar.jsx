@@ -1,4 +1,5 @@
 
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   List,
@@ -7,28 +8,44 @@ import {
   Swords,
   Skull,
   FlaskConical,
+  WandSparkles,
   Hourglass,
   Moon,
   Gift,
   ChevronRight,
   Truck,
   Sparkles,
-  WandSparkles,
 } from "lucide-react";
 
-const categories = [
-  { name: "Organs", icon: HeartPulse },
-  { name: "Forbidden Library", icon: BookOpen },
-  { name: "Weapons", icon: Swords },
-  { name: "Creepy Collectibles", icon: Skull },
-  { name: "Potions & Elixirs", icon: FlaskConical },
-  { name: "Occult Tools", icon: WandSparkles },
-  { name: "Relics & Artifacts", icon: Hourglass },
-  { name: "Curiosities", icon: Moon },
-  { name: "Cursed Gifts", icon: Gift },
-];
+import { useCategoryStore } from "../stores/useCategoryStore";
+
+
+const categoryIcons = {
+  organs: HeartPulse,
+  "forbidden-library": BookOpen,
+  weapons: Swords,
+  "creepy-collectibles": Skull,
+  "potions-elixirs": FlaskConical,
+  "occult-tools": WandSparkles,
+  "relics-artifacts": Hourglass,
+  curiosities: Moon,
+  "cursed-gifts": Gift,
+};
+
 
 const MarketplaceSidebar = () => {
+
+    const {
+  categories,
+  loading,
+  error,
+  fetchCategories,
+} = useCategoryStore();
+
+useEffect(() => {
+  fetchCategories();
+}, [fetchCategories]);
+
   return (
     <aside className="w-full min-w-0 space-y-3">
       {/* Category list */}
@@ -41,22 +58,45 @@ const MarketplaceSidebar = () => {
         </div>
 
         <nav className="py-2" aria-label="Product categories">
-          {categories.map(({ name, icon: Icon }) => (
-            <Link
-              key={name}
-              to={`/category/${encodeURIComponent(name)}`}
-              className="group flex items-center gap-3 px-4 py-2 text-sm text-gray-200 transition-colors hover:bg-red-950/40 hover:text-red-300"
-            >
-              <Icon size={18} className="shrink-0 text-red-400" />
+          
+{loading && categories.length === 0 && (
+  <p className="px-4 py-3 text-xs text-gray-400">
+    Summoning categories...
+  </p>
+)}
 
-              <span className="min-w-0 flex-1">{name}</span>
+{error && categories.length === 0 && (
+  <p className="px-4 py-3 text-xs text-red-400">
+    {error}
+  </p>
+)}
 
-              <ChevronRight
-                size={15}
-                className="text-gray-500 transition-transform group-hover:translate-x-1"
-              />
-            </Link>
-          ))}
+{categories.map((category) => {
+  const Icon = categoryIcons[category.slug] || Gift;
+
+  return (
+    <Link
+      key={category._id}
+      to={`/category/${encodeURIComponent(category.slug)}`}
+      className="group flex items-center gap-3 px-4 py-2 text-sm text-gray-200 transition-colors hover:bg-red-950/40 hover:text-red-300"
+    >
+      <Icon
+        size={18}
+        className="shrink-0 text-red-400"
+      />
+
+      <span className="min-w-0 flex-1">
+        {category.name}
+      </span>
+
+      <ChevronRight
+        size={15}
+        className="text-gray-500 transition-transform group-hover:translate-x-1"
+      />
+    </Link>
+  );
+})}
+
         </nav>
       </div>
 

@@ -3,22 +3,31 @@ import HomePageProducts from '../components/HomePageProducts';
 import MarketplaceSidebar from "../components/MarketplaceSidebar";
 import PromoBanners from "../components/PromoBanners";
 import MarketplaceFilters from "../components/MarketplaceFilters";
+import { useEffect } from "react";
+import { useCategoryStore } from "../stores/useCategoryStore";
 
-const categories = [
-  { href: "/organ", name: "Organs", imageUrl: "/heart.jpeg" },
-  { href: "/forbiddenLibrary", name: "Forbidden Library", imageUrl: "/book3.jpg" },
-  { href: "/weapons", name: "Weapons", imageUrl: "/weapon2.jpg" },
-  { href: "/creepyCollectibles", name: "Creepy Collectibles", imageUrl: "/doll1.jpg" },
-  { href: "/potions", name: "Potions", imageUrl: "/potion1.jpeg" },
 
-  // { href: "/witchesApothecary", name: "Witches Apothecary", imageUrl: "/book1.jpg" },
-  // { href: '/The "Questionable" Shelf', name: 'The "Questionable" Shelf', imageUrl: "/weapon1.jpg" },
-  // { href: "/lost&found", name: "Lost & Found (Definitely Not Stolen)", imageUrl: "/book1.jpg" },
-];
+
+
 
 
 
 const HomePage = () => {
+  const {
+    categories,
+    loading,
+    error,
+    fetchCategories,
+  } = useCategoryStore();
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  const featuredCategories = categories.filter(
+    (category) => category.isFeatured
+  );
+
   return (
     <div className="relative min-h-screen pt-16 text-white">
       <div className="relative z-10 mx-auto w-full max-w-[1800px] px-3 sm:px-5 xl:px-8">
@@ -50,15 +59,27 @@ const HomePage = () => {
                 <PromoBanners />
               </div>
 
-            {/* Five category cards */}
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:gap-4">
-              {categories.map((category) => (
-                <CategoryItem
-                  key={category.name}
-                  category={category}
-                />
-              ))}
-            </div>
+            
+{/* Featured category cards */}
+{loading && categories.length === 0 ? (
+  <p className="py-8 text-center text-gray-400">
+    Summoning marketplace categories...
+  </p>
+) : error && categories.length === 0 ? (
+  <p className="py-8 text-center text-red-400">
+    {error}
+  </p>
+) : (
+  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:gap-4">
+    {featuredCategories.map((category) => (
+      <CategoryItem
+        key={category._id}
+        category={category}
+      />
+    ))}
+  </div>
+)}
+
 
             {/* Product recommendations */}
             <div className="mt-8">

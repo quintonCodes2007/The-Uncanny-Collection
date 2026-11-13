@@ -198,13 +198,21 @@ export const getHomePageProducts = async (req, res) => {
                 $sample: { size: 15 } // Use 3 for recommendations
             }, 
             {
-                $project: {
-                    _id: 1,
-                    name: 1,
-                    description: 1,
-                    image: 1,
-                    price: 1
-                }
+              $project: {
+                _id: 1,
+                name: 1,
+                description: 1,
+                image: 1,
+                price: 1,
+                originalPrice: 1,
+                discountPercentage: 1,
+                inventoryQuantity: 1,
+                isFeatured: 1,
+                isHot: 1,
+                isNew: 1,
+                rating: 1,
+                reviewCount: 1,
+              }
             }
         ]); // Get 3 random products
         res.json(products);

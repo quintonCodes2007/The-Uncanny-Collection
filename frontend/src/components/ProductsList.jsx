@@ -44,7 +44,7 @@ const ProductsList = () => {
 
         <tbody className='bg-red-300/10 divide-y divide-gray-200'>
           {products?.map((product) => (
-            <tr key={product.id} className='hover:bg-red-700/10'>
+            <tr key={product._id} className="hover:bg-red-700/10">
 
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
@@ -93,7 +93,7 @@ const ProductsList = () => {
               </td>
 
               <td className='px-6 py-4 whitespace-nowrap'>
-                <div className='text-sm text-gray-300'>{product.category}</div>
+                <div className='text-sm text-gray-300'>{product.category?.name ?? "Uncategorized"}</div>
               </td>
 
               <td className='px-6 py-4 whitespace-nowrap'>

@@ -6,7 +6,7 @@ const CategoryItem = ({ category }) => {
 
   return (
     <Link
-      to={`/category/${encodeURIComponent(category.name)}`}
+      to={`/category/${encodeURIComponent(category.slug)}`}
       className="group relative block h-44 w-full overflow-hidden rounded-lg sm:h-48 lg:h-52"
     >
       <img

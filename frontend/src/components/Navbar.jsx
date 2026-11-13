@@ -54,7 +54,7 @@ const Navbar = () => {
 <div className="border-b border-red-900/50 bg-gradient-to-r from-[#1b1019] via-[#551623] to-[#1b1019] px-5 py-2.5">
   <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4 text-xs text-gray-200">
     <span className="font-semibold tracking-wide">
-      🚚 FREE SHIPPING TO THE AFTERLIFE — TERMS MAY APPLY ✨
+      🚚 FREE SHIPPING TO THE AFTERLIFE - TERMS MAY APPLY ✨
     </span>
 
     <div className="hidden items-center gap-5 lg:flex">
