@@ -14,6 +14,18 @@ const productSchema = new mongoose.Schema({
         min: 0,
         required: true,
     },
+    originalPrice: {
+    type: Number,
+    min: 0,
+    default: null,
+    },
+
+    discountPercentage: {
+    type: Number,
+    min: 0,
+    max: 100,
+    default: 0,
+    },
     inventoryQuantity: {
     type: Number,
     required: true,

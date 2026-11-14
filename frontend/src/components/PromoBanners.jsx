@@ -4,12 +4,12 @@ import { ArrowUpRight } from "lucide-react";
 
 const promotions = [
   {
-    label: "LIMITED TIME",
+    label: "FORBIDDEN DISCOUNTS",
     title: "The Midnight Sale",
-    description: "Up to 40% Off Select Artifacts",
+    description: "Sinister savings on select artifacts.",
     button: "Shop the Sale",
     image: "/banner2.jpeg",
-    href: "/",
+    href: "/deals",
   },
   {
     label: "FEATURED COLLECTION",
@@ -17,7 +17,7 @@ const promotions = [
     description: "Perfect for loved ones... or enemies.",
     button: "Explore",
     image: "/banner1.jpeg",
-    href: "/category/Cursed%20Gifts",
+    href: "/category/cursed-gifts",
   },
 ];
 

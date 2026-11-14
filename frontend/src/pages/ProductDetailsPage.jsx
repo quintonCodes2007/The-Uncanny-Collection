@@ -282,9 +282,20 @@ const ProductDetailsPage = () => {
                   </span>
                 )}
 
-                {product.discountPercentage > 0 && (
-                  <span className="rounded-md bg-red-700 px-3 py-1.5 text-xs font-bold text-white">
-                    -{product.discountPercentage}%
+                  {product.discountPercentage > 0 && (
+                  <span
+                    className="
+                      inline-flex items-center gap-1.5
+                      rounded-md
+                      border border-red-400/50
+                      bg-red-950/70
+                      px-3 py-1.5
+                      text-xs font-bold tracking-wide text-red-200
+                      shadow-[0_0_14px_rgba(239,68,68,0.35)]
+                      backdrop-blur-sm
+                    "
+                  >
+                    -{product.discountPercentage}% OFF
                   </span>
                 )}
               </div>

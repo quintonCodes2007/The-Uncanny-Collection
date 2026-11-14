@@ -10,7 +10,7 @@ import {
   toggleFeaturedProduct,
   updateProductStock,
   searchProducts,
-  getProductById
+  getProductById,updateProductDetails
 } from '../controllers/product.controller.js';
 import { protectRoute, adminRoute } from '../middleware/auth.middleware.js';
 
@@ -27,6 +27,7 @@ router.post("/", protectRoute, adminRoute, createProduct);
 router.patch("/:id", protectRoute, adminRoute, toggleFeaturedProduct);
 router.delete("/:id", protectRoute, adminRoute, deleteProduct);
 router.patch("/:id/stock", protectRoute, adminRoute, updateProductStock);
+router.patch("/:id/details", protectRoute, adminRoute, updateProductDetails);
 
 
 

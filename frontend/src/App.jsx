@@ -17,7 +17,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import SearchResultsPage from "./pages/SearchResultsPage";
 import ProductsPage from "./pages/ProductsPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
-
+import SpecialCollectionPage from "./pages/SpecialCollectionPage";
 
 
 import { useUserStore } from "./stores/useUserStore";
@@ -81,6 +81,10 @@ useEffect(() => {
         <Route path="/wishlist" element={ user ? <MyWishlistPage /> : <Navigate to="/login" replace /> } />
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/product/:id" element={<ProductDetailsPage />}/>
+        {/* Promotional collections */}
+        <Route path="/deals" element={<SpecialCollectionPage />} />
+        <Route path="/new-arrivals" element={<SpecialCollectionPage />} />
+        <Route path="/hot-artifacts" element={<SpecialCollectionPage />} />
       </Routes>
       </main>
     </div>

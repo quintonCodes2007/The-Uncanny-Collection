@@ -73,9 +73,20 @@ const handleWishlist = () => {
 <div className="absolute left-2 top-2 z-10 flex flex-row flex-wrap items-center gap-1.5">
 
   {product.discountPercentage > 0 && (
-    <span className="rounded-md bg-red-800 px-2 py-1 text-[10px] font-semibold text-white">
-      <Tag size={11} className="mr-1 inline" />
-      {product.discountPercentage}% Off
+    <span
+      className="
+        inline-flex items-center gap-1
+        rounded-md
+        border border-red-500/50
+        bg-red-900/90
+        px-2.5 py-1
+        text-[10px] font-bold tracking-wide text-red-200
+        shadow-[0_0_12px_rgba(239,68,68,0.35)]
+        backdrop-blur-sm
+      "
+    >
+      <Tag size={11} />
+      {product.discountPercentage}% OFF
     </span>
   )}
 
@@ -145,14 +156,14 @@ const handleWishlist = () => {
                 ? "Remove from wishlist"
                 : "Add to wishlist"
             }
-            className={`absolute right-2 top-2 z-10 rounded-full p-2 transition-all duration-200 hover:scale-110 ${
+            className={`absolute right-2 top-2 z-10 rounded-full p-1 transition-all duration-200 hover:scale-110 ${
               wishlisted
                 ? "bg-red-900/90 text-red-400"
                 : "bg-black/65 text-white hover:text-red-400"
             }`}
           >
             <Heart
-              size={19}
+              size={15}
               className={
                 wishlisted ? "fill-red-500 text-red-500" : ""
               }

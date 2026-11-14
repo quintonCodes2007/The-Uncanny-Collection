@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import CategoryItem from "../components/CategoryItem";
 import PromoBanners from "../components/PromoBanners";
 import MarketplaceCatalog from "../components/MarketplaceCatalog";
+import { CategoryGridSkeleton } from "../components/MarketplaceSkeleton";
 
 import { useCategoryStore } from "../stores/useCategoryStore";
 
@@ -44,9 +45,7 @@ const HomePage = () => {
       </div>
 
       {loading && categories.length === 0 ? (
-        <p className="py-8 text-center text-gray-400">
-          Summoning marketplace categories...
-        </p>
+        <CategoryGridSkeleton />
       ) : error && categories.length === 0 ? (
         <p className="py-8 text-center text-red-400">
           {error}

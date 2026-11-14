@@ -1,12 +1,18 @@
+
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 const ScrollToTop = () => {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
+
+  const page = new URLSearchParams(search).get("page");
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+    window.scrollTo({
+      top: 0,
+      behavior: "instant",
+    });
+  }, [pathname, page]);
 
   return null;
 };

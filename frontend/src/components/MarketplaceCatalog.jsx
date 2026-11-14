@@ -1,28 +1,28 @@
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams, useLocation } from "react-router-dom";
+import { Link, useSearchParams, useLocation } from "react-router-dom";
+import { Ghost, PackageOpen, ArrowLeft } from "lucide-react";
 
 import axios from "../lib/axios";
 import ProductCard from "./ProductCard";
 import ProductPagination from "./ProductPagination";
 import MarketplaceSidebar from "./MarketplaceSidebar";
 import MarketplaceFilters from "./MarketplaceFilters";
-import LoadingSpinner from "./LoadingSpinner";
+import { ProductGridSkeleton } from "./MarketplaceSkeleton";
 
 import { useCurrencyStore } from "../stores/useCurrencyStore";
 import { convertProductPrice } from "../lib/currency";
 
 const PRODUCTS_PER_PAGE = 18;
 
-
 const MarketplaceCatalog = ({
   categorySlug = null,
+  collection = null,
   title = "Recommended for Your Downfall",
   description = "Handpicked artifacts that seem to have a mind of their own.",
   children,
 }) => {
-
-const location = useLocation();
+  const { pathname } = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [products, setProducts] = useState([]);
@@ -33,14 +33,16 @@ const location = useLocation();
   const currency = useCurrencyStore((state) => state.currency);
   const rates = useCurrencyStore((state) => state.rates);
 
+  // Pagination
   const rawPage = Number(searchParams.get("page"));
+
   const requestedPage =
     Number.isSafeInteger(rawPage) && rawPage > 0
       ? rawPage
       : 1;
 
+  // Price filter
   const rawMaxPrice = searchParams.get("maxPrice");
-
   const parsedPrice =
     rawMaxPrice === null ? null : Number(rawMaxPrice);
 
@@ -51,16 +53,16 @@ const location = useLocation();
       ? parsedPrice
       : null;
 
+  // Availability filter
   const rawAvailability = searchParams.get("availability");
 
-  const availability = [
-    "all",
-    "inStock",
-    "lowStock",
-  ].includes(rawAvailability)
+  const availability = ["all", "inStock", "lowStock"].includes(
+    rawAvailability
+  )
     ? rawAvailability
     : "all";
 
+  // Fetch products
   useEffect(() => {
     let active = true;
 
@@ -110,6 +112,7 @@ const location = useLocation();
     };
   }, [categorySlug]);
 
+  // Update a URL filter
   const setFilter = (key, value) => {
     setSearchParams(
       (previous) => {
@@ -125,7 +128,6 @@ const location = useLocation();
           next.set(key, String(value));
         }
 
-        // A changed filter always returns to page one.
         next.delete("page");
 
         return next;
@@ -134,8 +136,35 @@ const location = useLocation();
     );
   };
 
+  // STEP 1: Collection-specific products
+  const collectionProducts = useMemo(() => {
+    if (collection === "deals") {
+      return products.filter((product) => {
+        const original = Number(product.originalPrice ?? 0);
+        const current = Number(product.price ?? 0);
+
+        return original > 0 && current < original;
+      });
+    }
+
+    if (collection === "new") {
+      return products.filter(
+        (product) => product.isNewArrival === true
+      );
+    }
+
+    if (collection === "hot") {
+      return products.filter(
+        (product) => product.isHot === true
+      );
+    }
+
+    return products;
+  }, [products, collection]);
+
+  // STEP 2: User-selected filters
   const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
+    return collectionProducts.filter((product) => {
       const stock = Number(product.inventoryQuantity ?? 0);
 
       if (availability === "inStock" && stock <= 0) {
@@ -163,41 +192,54 @@ const location = useLocation();
 
       return true;
     });
-  }, [products, availability, maxPrice, currency, rates]);
+  }, [
+    collectionProducts,
+    availability,
+    maxPrice,
+    currency,
+    rates,
+  ]);
 
+  // Pagination calculations
   const totalPages = Math.max(
     1,
     Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE)
   );
 
-  // Clamp the page if filtering reduces the number of pages.
   const currentPage = Math.min(requestedPage, totalPages);
 
-  const startIndex =
-    (currentPage - 1) * PRODUCTS_PER_PAGE;
+  const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
 
   const visibleProducts = filteredProducts.slice(
     startIndex,
     startIndex + PRODUCTS_PER_PAGE
   );
 
+  // Page headings
   const displayTitle = categorySlug
     ? categoryName || "Forbidden Collection"
     : title;
 
+  const isCollectionPage =
+    Boolean(categorySlug) ||
+    Boolean(collection) ||
+    pathname === "/products";
+
+  // Empty-state logic
+  const isCollectionEmpty = collectionProducts.length === 0;
+
   return (
     <div className="relative min-h-screen pt-16 text-white">
       <div className="relative z-10 mx-auto w-full max-w-[1800px] px-3 sm:px-5 xl:px-8">
-
         <div className="flex flex-col items-start gap-6 lg:flex-row">
 
-          {/* Shared marketplace sidebar */}
+          {/* Sidebar */}
           <div className="w-full min-w-0 space-y-3 lg:w-[195px] lg:shrink-0 xl:w-[205px]">
             <MarketplaceSidebar />
 
             <div className="mt-4">
               <MarketplaceFilters
-                products={products}
+                products={collectionProducts}
                 maxPrice={maxPrice}
                 setMaxPrice={(value) =>
                   setFilter("maxPrice", value)
@@ -210,58 +252,91 @@ const location = useLocation();
             </div>
           </div>
 
-          {/* Main marketplace content */}
+          {/* Main content */}
           <div className="min-w-0 w-full flex-1">
 
-            {/* Homepage-only content goes here */}
+            {/* Homepage banners and categories */}
             {children}
 
             <section className="mt-8 w-full min-w-0">
-              
-        {/* Marketplace heading */}
-        <div className={categorySlug || location.pathname === "/products" ? "mb-8 text-center" : "mb-5"}>
 
+              {/* Heading */}
+              <div
+                className={
+                  isCollectionPage
+                    ? "mb-8 text-center"
+                    : "mb-5"
+                }
+              >
+                <h1
+                  className={
+                    isCollectionPage
+                      ? "px-2 text-center text-2xl font-bold leading-tight text-red-600 wrap-break-word sm:text-4xl lg:text-5xl"
+                      : "text-xl font-bold text-red-400 sm:text-2xl"
+                  }
+                >
+                  {displayTitle}
+                </h1>
 
+                {!categorySlug && (
+                  <p className="mt-2 text-xs text-gray-400 sm:text-sm">
+                    {description}
+                  </p>
+                )}
+              </div>
 
-        <h1
-        className={
-            categorySlug || location.pathname === "/products"
-            ? "px-2 text-center text-2xl font-bold leading-tight text-red-600 wrap-break-word sm:text-4xl lg:text-5xl"
-            : "text-xl font-bold text-red-400 sm:text-2xl"
-        }
-        >
-        {displayTitle}
-        </h1>
-
-
-  {!categorySlug && (
-    <p className="mt-1 text-xs text-gray-400 sm:text-sm">
-      {description}
-    </p>
-  )}
-
-</div>
-
-
+              {/* Product content */}
               {loading ? (
-                <LoadingSpinner />
+                <ProductGridSkeleton />
               ) : error ? (
                 <p className="py-12 text-center text-red-400">
                   {error}
                 </p>
               ) : filteredProducts.length === 0 ? (
-                <div className="py-12 text-center">
-                  <p className="font-semibold text-red-400">
-                    Nothing survived your standards.
+
+                /* Empty collection or empty filter results */
+                <div className="mx-auto flex max-w-xl flex-col items-center rounded-2xl border border-[#69404b] bg-[#21151f] px-6 py-12 text-center shadow-xl shadow-black/20">
+
+                  <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full border border-red-500/30 bg-red-950/40 shadow-[0_0_25px_rgba(239,68,68,0.12)]">
+                    {isCollectionEmpty ? (
+                      <Ghost
+                        size={38}
+                        className="text-red-400"
+                      />
+                    ) : (
+                      <PackageOpen
+                        size={38}
+                        className="text-red-400"
+                      />
+                    )}
+                  </div>
+
+                  <h2 className="text-xl font-bold text-red-300">
+                    {isCollectionEmpty
+                      ? "This Realm Remains Uninhabited"
+                      : "Nothing Survived Your Standards"}
+                  </h2>
+
+                  <p className="mt-3 max-w-sm text-sm leading-6 text-gray-400">
+                    {isCollectionEmpty
+                      ? categorySlug
+                        ? "No cursed artifacts have been summoned into this category yet. Check back when the collection grows."
+                        : "This collection is currently empty. Our supernatural staff are searching for something appropriately questionable."
+                      : "No artifacts match your current filters. Try adjusting your price range or availability preferences."}
                   </p>
 
-                  <p className="mt-2 text-sm text-gray-400">
-                    Try changing your price or availability filters.
-                    Even ghosts have budgets.
-                  </p>
+                  <Link
+                    to="/products"
+                    className="mt-7 inline-flex items-center gap-2 rounded-lg border border-red-500/40 bg-[#922638] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-700"
+                  >
+                    <ArrowLeft size={16} />
+                    Explore Other Artifacts
+                  </Link>
                 </div>
+
               ) : (
                 <>
+                  {/* Products */}
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 xl:gap-3">
                     {visibleProducts.map((product) => (
                       <ProductCard
@@ -271,6 +346,7 @@ const location = useLocation();
                     ))}
                   </div>
 
+                  {/* Pagination */}
                   <ProductPagination
                     currentPage={currentPage}
                     totalPages={totalPages}

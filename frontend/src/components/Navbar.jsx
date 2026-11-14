@@ -16,6 +16,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useUserStore } from "../stores/useUserStore";
 import { useCartStore } from "../stores/useCartStore";
 
+import { scrollToHome } from "../utils/scrollToHome";
+
 import CurrencySelector from "./CurrencySelector";
 
 const Navbar = () => {
@@ -56,7 +58,8 @@ const Navbar = () => {
 const showSecondaryNav =
   pathname === "/" ||
   pathname === "/products" ||
-  pathname.startsWith("/category/");
+  pathname.startsWith("/category/") ||
+  ["/deals", "/new-arrivals", "/hot-artifacts"].includes(pathname);
 
 
   
@@ -72,28 +75,69 @@ const showSecondaryNav =
 
   return (
   <header className="navbar-style">
-   {/* Top announcement strip */}
+   
+{/* Top announcement strip */}
 <div className="border-b border-red-900/50 bg-gradient-to-r from-[#1b1019] via-[#551623] to-[#1b1019] px-5 py-2.5">
   <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4 text-xs text-gray-200">
+
+    {/* Announcement message */}
     <span className="font-semibold tracking-wide">
       🚚 FREE SHIPPING TO THE AFTERLIFE - TERMS MAY APPLY ✨
     </span>
 
+    {/* Announcement links */}
     <div className="hidden items-center gap-5 lg:flex">
+
+      {/*
       <span>💀 Track a Soul</span>
       <span className="text-gray-500">|</span>
+
       <span>🎁 Gift Cards</span>
       <span className="text-gray-500">|</span>
-      <span>ⓘ Help & Contact</span>
+      */}
+
+      {/* Help & Contact */}
+      <a
+        href="#contact"
+        onClick={(e) => {
+          e.preventDefault();
+
+          document.getElementById("contact")?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }}
+        className="transition-colors hover:text-red-400"
+      >
+        ⓘ Help & Contact
+      </a>
+
       <span className="text-gray-500">|</span>
-      <span className="text-amber-300">👑 Join the Curse Club</span>
+
+      {/* Future Curse Club membership */}
+      <span
+        className="flex items-center gap-2 text-amber-300"
+        title="The Curse Club is coming soon"
+      >
+        👑 Join the Curse Club
+
+        <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[9px] font-semibold tracking-wide text-amber-200">
+          COMING SOON
+        </span>
+      </span>
+
     </div>
   </div>
 </div>
+
       <div className="container relative mx-auto navbar-container">
         <Link
           to="/"
-          onClick={closeMenu}
+          onClick={(e) => {
+            e.preventDefault();
+            closeMenu();
+            scrollToHome(navigate, pathname);
+          }}
           className="logo-link"
         >
           The Uncanny Collection
@@ -285,24 +329,35 @@ const showSecondaryNav =
         <div className="w-full border-y border-red-900/60 bg-gradient-to-r from-[#2a111c] via-[#461823] to-[#2a111c]">
           <nav
             aria-label="Marketplace categories"
-            className="mx-auto flex max-w-[1600px] items-center justify-center gap-15 overflow-x-auto px-6 py-2.5 text-xs font-medium whitespace-nowrap scrollbar-hide"
+            className="mx-auto flex max-w-[1600px] items-center justify-center gap-8 overflow-x-auto px-6 py-2.5 text-xs font-medium whitespace-nowrap scrollbar-hide lg:gap-12"
           >
             {[
-              { label: "Today's Deals", icon: Tag },
-              { label: "New Arrivals", icon: Sparkles },
-              { label: "Best Sellers", icon: Flame },
-              { label: "Cursed Gifts", icon: Gift },
-              { label: "Objects of Desire", icon: Box },
-              { label: "You Might Also Regret", icon: Eye },
-            ].map(({ label, icon: Icon }) => (
-              <span
-                key={label}
-                className="flex shrink-0 items-center gap-1.5 text-gray-200 transition-colors hover:text-red-400"
+              { label: "Deals", icon: Tag, path: "/deals" },
+              { label: "New Arrivals", icon: Sparkles, path: "/new-arrivals" },
+              { label: "Hot Artifacts", icon: Flame, path: "/hot-artifacts" },
+            ].map(({ label, icon: Icon, path }) => (
+              <Link
+                key={path}
+                to={path}
+                className={`flex shrink-0 items-center gap-1.5 transition-colors hover:text-red-400 ${
+                  pathname === path
+                    ? "font-bold text-red-400"
+                    : "text-gray-200"
+                }`}
               >
                 <Icon size={17} className="text-red-300" />
                 {label}
-              </span>
+              </Link>
             ))}
+
+            <span
+              aria-hidden="true"
+              className="hidden h-4 w-px shrink-0 bg-red-500/30 lg:block"
+            />
+
+            <p className="hidden shrink-0 text-xs font-medium tracking-wide text-red-300 lg:block">
+              💀 Every purchase comes with consequences.
+            </p>
           </nav>
         </div>
       )}

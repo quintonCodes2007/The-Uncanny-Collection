@@ -1,5 +1,5 @@
 
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const ProductPagination = ({
@@ -8,6 +8,7 @@ const ProductPagination = ({
   categorySlug = null,
   searchParams,
 }) => {
+  const { pathname } = useLocation();
   if (totalPages <= 1) return null;
 
   const getPageUrl = (page) => {
@@ -20,10 +21,12 @@ const ProductPagination = ({
     }
 
     const path = categorySlug
-      ? `/category/${encodeURIComponent(categorySlug)}`
-      : page === 1
+    ? `/category/${encodeURIComponent(categorySlug)}`
+    : pathname === "/"
+      ? page === 1
         ? "/"
-        : "/products";
+        : "/products"
+      : pathname;
 
     const query = params.toString();
 

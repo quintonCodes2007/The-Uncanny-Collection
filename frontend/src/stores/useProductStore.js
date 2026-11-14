@@ -60,7 +60,9 @@ export const useProductStore = create((set) => ({
 
             set((state) => ({
             products: state.products.map((product) =>
-                product._id === productId ? res.data : product
+                product._id === productId
+                ? { ...product, ...res.data, category: product.category }
+                : product
             ),
             }));
 
@@ -106,6 +108,35 @@ export const useProductStore = create((set) => ({
             toast.error(error.response?.data?.error || 'Something went wrong');
         }
 
+    },
+
+    updateProductDetails: async (productId, details) => {
+    try {
+        const response = await axios.patch(
+        `/products/${productId}/details`,
+        details
+        );
+
+        set((state) => ({
+        products: state.products.map((product) =>
+            product._id === productId
+            ? {
+                ...product,
+                ...response.data,
+                }
+            : product
+        ),
+        }));
+
+        toast.success("Product details updated");
+        return true;
+    } catch (error) {
+        toast.error(
+        error.response?.data?.message ||
+        "Failed to update product"
+        );
+        return false;
+    }
     },
 
 

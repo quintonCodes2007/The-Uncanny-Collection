@@ -387,4 +387,104 @@ export const getProductById = async (req, res) => {
 };
 
 
+export const updateProductDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, regularPrice, salePrice } = req.body;
+
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({
+        message: "Invalid product ID",
+      });
+    }
+
+    if (
+      typeof name !== "string" ||
+      !name.trim() ||
+      name.trim().length > 200
+    ) {
+      return res.status(400).json({
+        message: "Product name must contain 1–200 characters",
+      });
+    }
+
+    const isValidPrice = (value) =>
+      value !== null &&
+      value !== undefined &&
+      value !== "" &&
+      Number.isFinite(Number(value)) &&
+      Number(value) >= 0 &&
+      Math.round(Number(value) * 100) / 100 === Number(value);
+
+    if (!isValidPrice(regularPrice)) {
+      return res.status(400).json({
+        message: "Enter a valid regular price",
+      });
+    }
+
+    const regular = Number(regularPrice);
+
+    const hasSale =
+      salePrice !== null &&
+      salePrice !== undefined &&
+      salePrice !== "";
+
+    if (hasSale && !isValidPrice(salePrice)) {
+      return res.status(400).json({
+        message: "Enter a valid sale price",
+      });
+    }
+
+    const sale = hasSale ? Number(salePrice) : null;
+
+    if (hasSale && sale >= regular) {
+      return res.status(400).json({
+        message: "Sale price must be lower than regular price",
+      });
+    }
+
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return res.status(404).json({
+        message: "Product not found",
+      });
+    }
+
+    product.name = name.trim();
+
+    if (hasSale) {
+      product.price = sale;
+      product.originalPrice = regular;
+
+      product.discountPercentage = Math.round(
+        ((regular - sale) / regular) * 100
+      );
+    } else {
+      product.price = regular;
+      product.originalPrice = null;
+      product.discountPercentage = 0;
+    }
+
+    await product.save();
+    await product.populate("category", "name slug");
+
+    // Refresh featured-product pricing cache.
+    try {
+      await redis.del("featuredProducts");
+    } catch (cacheError) {
+      console.error("Could not clear featured cache:", cacheError);
+    }
+
+    return res.status(200).json(product);
+  } catch (error) {
+    console.error("Failed to update product:", error);
+
+    return res.status(500).json({
+      message: "Failed to update product details",
+    });
+  }
+};
+
+
 
