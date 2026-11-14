@@ -5,7 +5,7 @@ import { useCartStore } from '../stores/useCartStore.js';
 
 import CurrencyPrice from "./CurrencyPrice";
 
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useWishlistStore } from "../stores/useWishlistStore";
 
 const ProductCard = ({ product }) => {
@@ -54,13 +54,19 @@ const handleWishlist = () => {
       <article className="group flex min-w-0 flex-col overflow-hidden rounded-lg border border-[#51303d] bg-[#1e141c] transition-all duration-300 hover:border-red-500/70 hover:shadow-lg hover:shadow-red-950/30">
 
         {/* Product image and badges */}
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#130b11]">
-          <img
-            src={product.image}
-            alt={product.name}
-            loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+        <div className="relative aspect-[5/3] w-full overflow-hidden bg-[#130b11]">
+          <Link
+            to={`/product/${product._id}`}
+            aria-label={`View details for ${product.name}`}
+            className="block h-full w-full"
+          >
+            <img
+              src={product.image}
+              alt={product.name}
+              loading="lazy"
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          </Link>
 
           
 {/* Promotional badges */}
@@ -155,10 +161,15 @@ const handleWishlist = () => {
         </div>
 
         {/* Product information */}
-        <div className="flex flex-1 flex-col p-2.5 sm:p-3">
+        <div className="flex flex-1 flex-col p-2">
 
-          <h3 className="line-clamp-1 text-sm font-bold text-white">
-            {product.name}
+          <h3 className="line-clamp-1 text-sm    font-bold text-white">
+            <Link
+              to={`/product/${product._id}`}
+              className="transition-colors hover:text-red-400"
+            >
+              {product.name}
+            </Link>
           </h3>
 
           <p className="mt-1 line-clamp-1 text-[11px] text-gray-400">
@@ -193,7 +204,7 @@ const handleWishlist = () => {
             )}
 
           {/* Price and stock */}
-          <div className="mt-auto pt-3">
+          <div className="mt-auto pt-2">
             <div className="flex flex-wrap items-center justify-between gap-1">
               <div className="flex items-center gap-2">
                 <CurrencyPrice
@@ -236,7 +247,7 @@ const handleWishlist = () => {
               type="button"
               onClick={handleAddToCart}
               disabled={product.inventoryQuantity <= 0}
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-md border border-red-500/60 bg-[#922638] px-2 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-1.5 flex w-full items-center justify-center gap-1.5 rounded-md border border-red-500/60 bg-[#922638] px-2 py-1 text-[11px] font-semibold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <ShoppingCart size={14} />
               Add to Cart

@@ -117,15 +117,15 @@ export const createProduct = async (req, res) => {
     );
 
     const product = await Product.create({
-  name: name.trim(),
-  description: description.trim(),
-  price: numericPrice,
-  inventoryQuantity: quantity,
-  image: cloudinaryResponse.secure_url,
-  category: existingCategory._id,
-  isHot: isHot === true,
-  isNewArrival: isNewArrival === true,
-});
+      name: name.trim(),
+      description: description.trim(),
+      price: numericPrice,
+      inventoryQuantity: quantity,
+      image: cloudinaryResponse.secure_url,
+      category: existingCategory._id,
+      isHot: isHot === true,
+      isNewArrival: isNewArrival === true,
+    });
 
     await product.populate("category", "name slug");
 
@@ -189,43 +189,25 @@ export const getRecommendedProducts = async (req, res) => {
     }
 };
 
-export const getHomePageProducts = async (req, res) => {
-    try {
-        const products = await Product.aggregate([
-            {
-                $match: {
-                    isVisible: { $ne: false },
-                    inventoryQuantity: { $gt: 0 }
-                }
-            },
-            {
-                $sample: { size: 15 } // Use 3 for recommendations
-            }, 
-            {
-              $project: {
-                _id: 1,
-                name: 1,
-                description: 1,
-                image: 1,
-                price: 1,
-                originalPrice: 1,
-                discountPercentage: 1,
-                inventoryQuantity: 1,
-                isFeatured: 1,
-                isHot: 1,
-                isNewArrival: 1,
-                rating: 1,
-                reviewCount: 1,
-              }
-            }
-        ]); // Get 3 random products
-        res.json(products);
-    } catch (error) {
-        console.error("Error in getRecommendedProducts controller:", error.message);
-        res.status(500).json({message: "Server error", error:error.message});
-    }
-};
 
+
+export const getHomePageProducts = async (req, res) => {
+  try {
+    const products = await Product.find({
+      isVisible: { $ne: false },
+    })
+      .sort({ createdAt: -1, _id: -1 })
+      .lean();
+
+    return res.status(200).json(products);
+  } catch (error) {
+    console.error("Error fetching catalog:", error);
+
+    return res.status(500).json({
+      message: "Failed to fetch marketplace products",
+    });
+  }
+};
 
 export const getProductsByCategory = async (req, res) => {
   try {
@@ -246,8 +228,8 @@ export const getProductsByCategory = async (req, res) => {
     const products = await Product.find({
       category: category._id,
       isVisible: { $ne: false },
-      inventoryQuantity: { $gt: 0 },
     })
+      .sort({ createdAt: -1, _id: -1 })
       .populate("category", "name slug")
       .lean();
 
@@ -267,7 +249,6 @@ export const getProductsByCategory = async (req, res) => {
     });
   }
 };
-
 
 export const toggleFeaturedProduct = async (req, res) => {
     try {
@@ -371,5 +352,39 @@ export const searchProducts = async (req, res) => {
     });
   }
 };
+
+export const getProductById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({
+        message: "Invalid artifact ID",
+      });
+    }
+
+    const product = await Product.findOne({
+      _id: id,
+      isVisible: { $ne: false },
+    })
+      .populate("category", "name slug")
+      .lean();
+
+    if (!product) {
+      return res.status(404).json({
+        message: "This artifact has vanished from the collection.",
+      });
+    }
+
+    return res.status(200).json(product);
+  } catch (error) {
+    console.error("Error fetching product:", error);
+
+    return res.status(500).json({
+      message: "Failed to retrieve artifact",
+    });
+  }
+};
+
 
 

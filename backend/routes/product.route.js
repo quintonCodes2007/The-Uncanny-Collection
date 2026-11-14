@@ -9,7 +9,8 @@ import {
   getHomePageProducts,
   toggleFeaturedProduct,
   updateProductStock,
-  searchProducts
+  searchProducts,
+  getProductById
 } from '../controllers/product.controller.js';
 import { protectRoute, adminRoute } from '../middleware/auth.middleware.js';
 
@@ -21,10 +22,12 @@ router.get("/featured", getFeaturedProducts);
 router.get("/category/:category", getProductsByCategory);
 router.get("/recommendations", getRecommendedProducts);
 router.get("/homepageProducts", getHomePageProducts);
+router.get("/:id", getProductById);
 router.post("/", protectRoute, adminRoute, createProduct);
 router.patch("/:id", protectRoute, adminRoute, toggleFeaturedProduct);
 router.delete("/:id", protectRoute, adminRoute, deleteProduct);
 router.patch("/:id/stock", protectRoute, adminRoute, updateProductStock);
+
 
 
 

@@ -100,3 +100,33 @@ export const formatCurrencyPrice = (
 
   return `N$${nad.toFixed(2)}`;
 };
+
+
+export const convertProductPrice = (
+  price,
+  currency = "NAD",
+  rates = {}
+) => {
+  const nad = Number(price);
+
+  if (!Number.isFinite(nad)) return null;
+
+  if (currency === "QBL") return null;
+
+  if (getCurrency(currency).type === "cursed") {
+    return getCursedPrice(nad, currency);
+  }
+
+  if (currency === "BTC") {
+    return rates.BTC > 0 ? nad / rates.BTC : nad;
+  }
+
+  if (currency === "USD" || currency === "KES") {
+    return rates[currency] > 0
+      ? nad * rates[currency]
+      : nad;
+  }
+
+  return nad;
+};
+

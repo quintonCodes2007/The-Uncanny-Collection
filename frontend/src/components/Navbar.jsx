@@ -12,7 +12,7 @@ import {
   Heart,
   Tag, Sparkles, Flame, Gift, Box, Eye,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useUserStore } from "../stores/useUserStore";
 import { useCartStore } from "../stores/useCartStore";
 
@@ -48,6 +48,28 @@ const Navbar = () => {
   };
 
 
+
+  const { pathname } = useLocation();
+
+  
+
+const showSecondaryNav =
+  pathname === "/" ||
+  pathname === "/products" ||
+  pathname.startsWith("/category/");
+
+
+  
+  const hideMarketplaceTools = [
+    "/login",
+    "/signup",
+    "/dashboard",
+  ].includes(pathname);
+
+  const showMarketplaceTools = !hideMarketplaceTools;
+
+
+
   return (
   <header className="navbar-style">
    {/* Top announcement strip */}
@@ -77,12 +99,15 @@ const Navbar = () => {
           The Uncanny Collection
         </Link>
 
-        {/* Marketplace search bar */}
+        {showMarketplaceTools && (
         <form
           onSubmit={handleSearch}
           role="search"
           className="absolute left-[47%] hidden w-full max-w-sm -translate-x-1/2 md:flex xl:max-w-md"
         >
+          
+      
+
           <div className="flex w-full overflow-hidden rounded-xl border border-[#76505a] bg-[#271923] focus-within:border-red-500">
             <Search className="my-auto ml-4 shrink-0 text-gray-400" size={20} />
 
@@ -104,13 +129,18 @@ const Navbar = () => {
             </button>
           </div>
         </form>
+      )}
 
         {/* Currency selector */}
+        {showMarketplaceTools && (
           <div className="ml-auto hidden lg:block">
             <CurrencySelector />
           </div>
+        )}
 
+        
         {/* Wishlist */}
+        {showMarketplaceTools && (
           <button
             type="button"
             onClick={() => {
@@ -126,6 +156,8 @@ const Navbar = () => {
               Wishlist
             </span>
           </button>
+        )}
+
 
 
         {/* Desktop navigation */}
@@ -247,32 +279,72 @@ const Navbar = () => {
         </nav>
       )}
 
-            {/* Secondary marketplace navigation */}
-      <div className="w-full border-y border-red-900/60 bg-gradient-to-r from-[#2a111c] via-[#461823] to-[#2a111c]">
-        <nav
-          aria-label="Marketplace categories"
-          className="mx-auto flex max-w-[1600px] items-center justify-center gap-15 overflow-x-auto px-6 py-2.5 text-xs font-medium whitespace-nowrap scrollbar-hide"
-        >
-          {[
-            { label: "Today's Deals", icon: Tag },
-            { label: "New Arrivals", icon: Sparkles },
-            { label: "Best Sellers", icon: Flame },
-            { label: "Cursed Gifts", icon: Gift },
-            { label: "Objects of Desire", icon: Box },
-            { label: "You Might Also Regret", icon: Eye },
-          ].map(({ label, icon: Icon }) => (
-            <span
-              key={label}
-              className="flex shrink-0 items-center gap-1.5 text-gray-200 transition-colors hover:text-red-400"
-            >
-              <Icon size={17} className="text-red-300" />
-              {label}
-            </span>
-          ))}
-        </nav>
-      </div>
+            
+      {/* Secondary marketplace navigation */}
+      {showSecondaryNav && (
+        <div className="w-full border-y border-red-900/60 bg-gradient-to-r from-[#2a111c] via-[#461823] to-[#2a111c]">
+          <nav
+            aria-label="Marketplace categories"
+            className="mx-auto flex max-w-[1600px] items-center justify-center gap-15 overflow-x-auto px-6 py-2.5 text-xs font-medium whitespace-nowrap scrollbar-hide"
+          >
+            {[
+              { label: "Today's Deals", icon: Tag },
+              { label: "New Arrivals", icon: Sparkles },
+              { label: "Best Sellers", icon: Flame },
+              { label: "Cursed Gifts", icon: Gift },
+              { label: "Objects of Desire", icon: Box },
+              { label: "You Might Also Regret", icon: Eye },
+            ].map(({ label, icon: Icon }) => (
+              <span
+                key={label}
+                className="flex shrink-0 items-center gap-1.5 text-gray-200 transition-colors hover:text-red-400"
+              >
+                <Icon size={17} className="text-red-300" />
+                {label}
+              </span>
+            ))}
+          </nav>
+        </div>
+      )}
     </header>
   );
 };
+
+
+/**
+ * Returns the numeric price in the selected currency.
+ * All stored product prices are in NAD.
+ *
+ * This uses the same conversion rules as CurrencyPrice.
+ */
+export const convertProductPrice = (
+  price,
+  currency = "NAD",
+  rates = {}
+) => {
+  const nad = Number(price);
+
+  if (!Number.isFinite(nad)) return null;
+
+  // QBL has no ordinary price until authorized.
+  if (currency === "QBL") return null;
+
+  if (getCurrency(currency).type === "cursed") {
+    return getCursedPrice(nad, currency);
+  }
+
+  if (currency === "BTC") {
+    return rates.BTC > 0 ? nad / rates.BTC : nad;
+  }
+
+  if (currency === "USD" || currency === "KES") {
+    return rates[currency] > 0
+      ? nad * rates[currency]
+      : nad;
+  }
+
+  return nad;
+};
+
 
 export default Navbar;
