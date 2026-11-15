@@ -8,18 +8,35 @@ import CurrencyPrice from "./CurrencyPrice";
 import { Link, useNavigate } from "react-router-dom";
 import { useWishlistStore } from "../stores/useWishlistStore";
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, onStockChanged }) => {
     const { user } = useUserStore();
-    const { addToCart } = useCartStore();
-    const handleAddToCart = () => {
+    const addToCart = useCartStore((state) => state.addToCart);
 
-        if(!user) {
-            toast.success(`Please login to add to cart`, {id:"login"});
-            return
-        } else{
-            addToCart(product);
-        }
+    const isAdding = useCartStore(
+      (state) => Boolean(state.addingProducts[product._id])
+    );
+const handleAddToCart = async () => {
+  if (!user) {
+    toast.error("Sign in before adopting this artifact.");
+    navigate("/login");
+    return;
+  }
+
+  try {
+    console.log("Adding product:", product.name);
+
+    const success = await addToCart(product);
+
+    console.log("Cart result:", success);
+
+    if (success === true) {
+      await onStockChanged?.();
     }
+  } catch (error) {
+    console.error("Add to cart button error:", error);
+    toast.error("Something went wrong while adding this artifact.");
+  }
+};
 
     const navigate = useNavigate();
 
@@ -257,11 +274,11 @@ const handleWishlist = () => {
             <button
               type="button"
               onClick={handleAddToCart}
-              disabled={product.inventoryQuantity <= 0}
+              disabled={product.inventoryQuantity <= 0 || isAdding}
               className="mt-1.5 flex w-full items-center justify-center gap-1.5 rounded-md border border-red-500/60 bg-[#922638] px-2 py-1 text-[11px] font-semibold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <ShoppingCart size={14} />
-              Add to Cart
+              {isAdding ? "Reserving..." : "Add to Cart"}
             </button>
           </div>
         </div>

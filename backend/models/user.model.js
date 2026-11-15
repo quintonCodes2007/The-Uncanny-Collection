@@ -6,6 +6,16 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, "Name is required"]
     },
+    username: {
+        type: String,
+        trim: true,
+        minlength: [3, "Username must be at least 3 characters"],
+        maxlength: [25, "Username cannot exceed 25 characters"],
+        match: [
+            /^[a-zA-Z0-9_]+$/,
+            "Username can only contain letters, numbers and underscores",
+        ],
+        },
     email:{
         type: String,
         required: [true, "Email is required"],
@@ -55,6 +65,22 @@ userSchema.pre("save", async function () {
         throw new Error("Error hashing password");
     }
 })
+
+    // Unique usernames, ignoring letter case.
+    // Existing users without usernames are allowed.
+    userSchema.index(
+    { username: 1 },
+    {
+        unique: true,
+        partialFilterExpression: {
+        username: { $type: "string" },
+        },
+        collation: {
+        locale: "en",
+        strength: 2,
+        },
+    }
+    );
 
 userSchema.methods.comparePassword = async function(password) {
     return bcrypt.compare(password, this.password);

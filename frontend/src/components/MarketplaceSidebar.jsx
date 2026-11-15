@@ -13,8 +13,6 @@ import {
   Moon,
   Gift,
   ChevronRight,
-  Truck,
-  Sparkles,
 } from "lucide-react";
 
 import { useCategoryStore } from "../stores/useCategoryStore";
@@ -99,26 +97,8 @@ useEffect(() => {
 
         </nav>
       </div>
+      
 
-      {/* Delivery promotion */}
-      <div className="rounded-xl border border-red-800/60 bg-gradient-to-br from-[#4b1926] to-[#27141e] p-5">
-        <div className="flex items-center gap-3">
-          <Truck size={26} className="shrink-0 text-red-400" />
-          <h3 className="font-semibold leading-snug text-red-300">
-            Expedited Delivery
-            <span className="block">Across Realms</span>
-          </h3>
-        </div>
-
-        <p className="mt-3 text-sm leading-relaxed text-gray-300">
-          From our vault to your door — in 3–5 business hauntings.
-        </p>
-
-        <div className="mt-4 flex items-center justify-center gap-2 rounded-lg border border-red-500/70 px-4 py-2 text-sm text-red-200">
-          <Sparkles size={15} />
-          Discover Our Delivery
-        </div>
-      </div>
     </aside>
   );
 };

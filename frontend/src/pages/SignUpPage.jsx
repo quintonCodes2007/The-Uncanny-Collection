@@ -1,17 +1,26 @@
 import {useState} from 'react';
 import { Link } from 'react-router-dom';
-import { UserPlus, Mail, Lock, User, ArrowRight, Loader } from 'lucide-react';
+import {
+  UserPlus,
+  Mail,
+  Lock,
+  User,
+  ArrowRight,
+  Loader,
+  AtSign,
+} from "lucide-react";
 import { motion } from 'framer-motion';
 import { useUserStore } from '../stores/useUserStore.js';
 
 const SignUpPage = () => {
 
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-  });
+  name: "",
+  username: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+});
 
    const { signup, loading } = useUserStore();
 
@@ -29,7 +38,7 @@ const SignUpPage = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
       >
-        <h2 className='mt-6 text-center text-3xl font-extrabold text-red-200 h-15'>Create your account</h2>
+        <h2 className='mt-12 text-center text-3xl font-extrabold text-red-200 h-15'>Create your account</h2>
 
         
       </motion.div>
@@ -51,7 +60,7 @@ const SignUpPage = () => {
             {/* <label htmlFor="name" className='block text-sm font-medium text-gray-300'>
               Full name
             </label> */}
-            <div className='mt-1 relative rounded-md shadow-sm'>
+            <div className=' relative rounded-md shadow-sm'>
               <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
                 <User className='h-5 w-5 text-gray-400' aria-hidden='true' />
               </div>
@@ -66,6 +75,51 @@ const SignUpPage = () => {
               />
             </div>
             </div>
+
+
+            {/* Cursed username */}
+            <div>
+              {/* <label
+                htmlFor="username"
+                className="mb-2 block text-xs font-semibold uppercase tracking-widest text-red-300"
+              >
+                Choose Your Cursed Identity
+              </label>*/}
+
+              <div className="relative mt-1 rounded-md shadow-sm">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <AtSign className='h-5 w-5 text-gray-400' />
+                </div>
+
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  required
+                  minLength={3}
+                  maxLength={25}
+                  pattern="[A-Za-z0-9_]+"
+                  autoComplete="username"
+                  value={formData.username}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      username: e.target.value,
+                    })
+                  }
+                  placeholder="Username, e.g DarthVader666"
+                  title="Use 3–25 letters, numbers, or underscores"
+                  className='block w-full pl-10 px-3 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm'
+                />
+              </div>
+
+              
+
+              <p className="mt-1 text-[11px] text-gray-500">
+                3–25 characters. Letters, numbers and underscores only.
+              </p>
+            </div>
+
 
            <div>
             {/* <label htmlFor="name" className='block text-sm font-medium text-gray-300'>

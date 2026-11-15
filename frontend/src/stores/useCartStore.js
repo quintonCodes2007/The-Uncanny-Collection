@@ -5,10 +5,13 @@ import {toast} from 'react-hot-toast';
 
 export const useCartStore = create((set, get) => ({
   cartItems: [],
+  addingProducts: {},
   coupon: null,
   total: 0,
   subtotal: 0,
   isCouponApplied: false,
+
+  
 
 	getMyCoupon: async () => {
 		try {
@@ -49,23 +52,63 @@ export const useCartStore = create((set, get) => ({
     },
 
 
+
+
 addToCart: async (product) => {
+  const productId = product._id;
+
+  // Prevent duplicate requests for the same product
+  if (get().addingProducts[productId]) {
+    return false;
+  }
+
+  set((state) => ({
+    addingProducts: {
+      ...state.addingProducts,
+      [productId]: true,
+    },
+  }));
+
+  // Immediate visual feedback
+  const toastId = toast.loading("Reserving your artifact...");
+
   try {
+    // Reserve actual inventory in MongoDB
     await axios.post("/cart", {
-      productId: product._id,
+      productId,
     });
 
-    // Refresh cart with the actual reservation expiry
+    // Backend confirmed the reservation
+    toast.success("Artifact added to cart!", {
+      id: toastId,
+    });
+
+    // Refresh cart badge, quantities, and reservation expiry
     await get().getCartItems();
 
-    toast.success("Item added to cart");
+    return true;
   } catch (error) {
+    console.error("Error adding to cart:", error);
+
     toast.error(
       error.response?.data?.message ||
-      "Error adding item to cart"
+        "The artifact resisted your cart.",
+      { id: toastId }
     );
+
+    return false;
+  } finally {
+    // Re-enable this product's Add to Cart button
+    set((state) => {
+      const updated = { ...state.addingProducts };
+      delete updated[productId];
+
+      return { addingProducts: updated };
+    });
   }
 },
+
+
 
 
 

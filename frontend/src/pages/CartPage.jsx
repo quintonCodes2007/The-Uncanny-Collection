@@ -8,6 +8,7 @@ import OrderSummary from '../components/OrderSummary';
 import GiftCouponCard from '../components/GiftCouponCard';
 import { useEffect } from "react";
 import ReservationCountdown from "../components/ReservationCountdown";
+import DeliveryDestination from "../components/DeliveryDestination";
 
 const CartPage = () => {
 
@@ -72,8 +73,9 @@ const { cartItems } = useCartStore();
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}  
             >
+              <DeliveryDestination />
               <OrderSummary />
-              <GiftCouponCard/>
+              <GiftCouponCard />
             </motion.div> 
 
           )}

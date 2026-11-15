@@ -1,5 +1,5 @@
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { Link, useSearchParams, useLocation } from "react-router-dom";
 import { Ghost, PackageOpen, ArrowLeft } from "lucide-react";
 
@@ -9,10 +9,25 @@ import ProductPagination from "./ProductPagination";
 import MarketplaceSidebar from "./MarketplaceSidebar";
 import MarketplaceFilters from "./MarketplaceFilters";
 import { ProductGridSkeleton } from "./MarketplaceSkeleton";
+import DeliveryCard from "./DeliveryCard";
 
 import { useCurrencyStore } from "../stores/useCurrencyStore";
 import { convertProductPrice } from "../lib/currency";
 
+const shuffleProducts = (products) => {
+  const shuffled = [...products];
+
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+
+    [shuffled[i], shuffled[j]] = [
+      shuffled[j],
+      shuffled[i],
+    ];
+  }
+
+  return shuffled;
+};
 const PRODUCTS_PER_PAGE = 18;
 
 const MarketplaceCatalog = ({
@@ -87,8 +102,14 @@ const MarketplaceCatalog = ({
             response.data.category?.name ?? categorySlug
           );
         } else {
+          const fetchedProducts = Array.isArray(response.data)
+            ? response.data
+            : [];
+
           setProducts(
-            Array.isArray(response.data) ? response.data : []
+            pathname === "/"
+              ? shuffleProducts(fetchedProducts)
+              : fetchedProducts
           );
         }
       } catch (err) {
@@ -110,7 +131,7 @@ const MarketplaceCatalog = ({
     return () => {
       active = false;
     };
-  }, [categorySlug]);
+  }, [categorySlug, pathname]);
 
   // Update a URL filter
   const setFilter = (key, value) => {
@@ -228,16 +249,79 @@ const MarketplaceCatalog = ({
   // Empty-state logic
   const isCollectionEmpty = collectionProducts.length === 0;
 
+  const refreshStock = useCallback(async () => {
+  try {
+    const endpoint = categorySlug
+      ? `/products/category/${encodeURIComponent(categorySlug)}`
+      : "/products/homepageProducts";
+
+    const response = await axios.get(endpoint);
+
+    const latestProducts = categorySlug
+      ? response.data.products ?? []
+      : Array.isArray(response.data)
+        ? response.data
+        : [];
+
+    setProducts((currentProducts) => {
+      const stockById = new Map(
+        latestProducts.map((item) => [
+          item._id,
+          item.inventoryQuantity,
+        ])
+      );
+
+      return currentProducts.map((product) =>
+        stockById.has(product._id)
+          ? {
+              ...product,
+              inventoryQuantity: stockById.get(product._id),
+            }
+          : product
+      );
+    });
+  } catch (error) {
+    console.error("Could not refresh inventory:", error);
+  }
+}, [categorySlug]);
+
+useEffect(() => {
+  const interval = window.setInterval(() => {
+    if (document.visibilityState === "visible") {
+      refreshStock();
+    }
+  }, 60_000);
+
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === "visible") {
+      refreshStock();
+    }
+  };
+
+  document.addEventListener(
+    "visibilitychange",
+    handleVisibilityChange
+  );
+
+  return () => {
+    window.clearInterval(interval);
+
+    document.removeEventListener(
+      "visibilitychange",
+      handleVisibilityChange
+    );
+  };
+}, [refreshStock]);
+
   return (
     <div className="relative min-h-screen pt-16 text-white">
       <div className="relative z-10 mx-auto w-full max-w-[1800px] px-3 sm:px-5 xl:px-8">
         <div className="flex flex-col items-start gap-6 lg:flex-row">
 
           {/* Sidebar */}
-          <div className="w-full min-w-0 space-y-3 lg:w-[195px] lg:shrink-0 xl:w-[205px]">
-            <MarketplaceSidebar />
+            <div className="w-full min-w-0 space-y-3 lg:w-[195px] lg:shrink-0 xl:w-[205px]">
+              <MarketplaceSidebar />
 
-            <div className="mt-4">
               <MarketplaceFilters
                 products={collectionProducts}
                 maxPrice={maxPrice}
@@ -249,8 +333,9 @@ const MarketplaceCatalog = ({
                   setFilter("availability", value)
                 }
               />
+
+              <DeliveryCard />
             </div>
-          </div>
 
           {/* Main content */}
           <div className="min-w-0 w-full flex-1">
@@ -342,6 +427,7 @@ const MarketplaceCatalog = ({
                       <ProductCard
                         key={product._id}
                         product={product}
+                        onStockChanged={refreshStock}
                       />
                     ))}
                   </div>

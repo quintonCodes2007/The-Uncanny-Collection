@@ -36,3 +36,25 @@
     animation: none;
   }
 }
+
+@keyframes review-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.review-reveal {
+  animation: review-reveal 350ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .review-reveal {
+    animation: none;
+  }
+}

@@ -6,9 +6,17 @@ import { expireReservations } from "../lib/reservation.service.js";
 import Reservation from "../models/reservation.model.js";
 import { reserveStock, updateReservedQuantity, } from "../lib/reservation.service.js";
 
-export const getCartProducts = async (req, res) => {
+export const getCartProducts = async (req, res) => {  const startedAt = performance.now();
   try {
-    await expireReservations();
+    const cleanupStartedAt = performance.now();
+
+await expireReservations();
+
+console.log(
+  `[CART GET] Reservation cleanup: ${
+    (performance.now() - cleanupStartedAt).toFixed(0)
+  }ms`
+);
 
       // Fetch the latest cart directly from MongoDB
       const user = await User.findById(req.user._id);
@@ -49,7 +57,9 @@ export const getCartProducts = async (req, res) => {
         expiresAt: reservationMap.get(product._id.toString()) ?? null,
       };
     });
-
+    console.log(
+  `[CART GET] Total: ${(performance.now() - startedAt).toFixed(0)}ms`
+);
     res.json(cartItems);
   } catch (error) {
     console.error("Error fetching cart:", error);
@@ -60,6 +70,7 @@ export const getCartProducts = async (req, res) => {
 };
 
 export const addToCart = async (req, res) => {
+    const startedAt = performance.now();
   try {
     const { productId } = req.body;
     const userId = req.user._id;
@@ -129,7 +140,9 @@ export const addToCart = async (req, res) => {
         return user.cartItems;
       }
     );
-
+    console.log(
+  `[CART POST] Total: ${(performance.now() - startedAt).toFixed(0)}ms`
+);
     res.json(cartItems);
   } catch (error) {
     console.error("Error adding to cart:", error);

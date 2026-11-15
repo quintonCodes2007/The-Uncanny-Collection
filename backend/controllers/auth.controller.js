@@ -30,15 +30,52 @@ const setCookies = (res, accessToken, refreshToken) => {
 };
 
 export const signup = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, username, email, password } = req.body;
   try {
-    const userExists = await User.findOne({email});
 
-    if(userExists) {
-    return res.status(400).json({message: "User already exists"});  
+      const cleanUsername =
+    typeof username === "string" ? username.trim() : "";
+
+  if (
+    cleanUsername.length < 3 ||
+    cleanUsername.length > 25 ||
+    !/^[a-zA-Z0-9_]+$/.test(cleanUsername)
+  ) {
+    return res.status(400).json({
+      message:
+        "Username must be 3–25 characters and contain only letters, numbers or underscores",
+    });
+  }
+
+  const existingUsername = await User.findOne({
+    username: cleanUsername,
+  }).collation({
+    locale: "en",
+    strength: 2,
+  });
+
+  if (existingUsername) {
+    return res.status(409).json({
+      message: "This cursed identity has already been claimed",
+    });
+  }
+
+    const existingEmail = await User.findOne({
+      email: email.trim().toLowerCase(),
+    });
+
+    if (existingEmail) {
+      return res.status(409).json({
+        message: "This email address is already registered. Please log in instead.",
+      });
     }
 
-    const user = await User.create({name, email, password});
+    const user = await User.create({
+      name,
+      username: cleanUsername,
+      email,
+      password,
+    });
 
     //authentication token generation logic
     const { accessToken, refreshToken } = generateTokens(user._id);
@@ -48,11 +85,19 @@ export const signup = async (req, res) => {
 
     res.status(201).json({user:{
       _id: user._id, 
-      name: user.name, 
+      name: user.name,
+      username: user.username, 
       email: user.email, 
       role: user.role},
       message: "User created successfully",});
   } catch (error) {
+      if (error.code === 11000) {
+    return res.status(409).json({
+      message: error.keyPattern?.username
+        ? "This cursed identity has already been claimed"
+        : "An account with this email already exists",
+    });
+  }
     console.error("Error in signup controller:", error.message);
     res.status(500).json({message: error.message});
   }
@@ -71,12 +116,11 @@ export const login = async (req, res) => {
       setCookies(res, accessToken, refreshToken);
 
       res.json({
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role
-          
-        
+        _id: user._id,
+        name: user.name,
+        username: user.username ?? null,
+        email: user.email,
+        role: user.role,
       });
     } else {
       res.status(401).json({ message: "Invalid email or password" });

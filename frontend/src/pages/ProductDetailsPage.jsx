@@ -17,8 +17,9 @@ import toast from "react-hot-toast";
 
 import axios from "../lib/axios";
 import CurrencyPrice from "../components/CurrencyPrice";
+import ProductReviews from "../components/ProductReviews";
 import ProductCard from "../components/ProductCard";
-import LoadingSpinner from "../components/LoadingSpinner";
+import ProductDetailsSkeleton from "../components/ProductDetailsSkeleton";
 
 import { useUserStore } from "../stores/useUserStore";
 import { useCartStore } from "../stores/useCartStore";
@@ -109,7 +110,7 @@ const ProductDetailsPage = () => {
     };
   }, [id]);
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <ProductDetailsSkeleton />;
 
   if (error || !product) {
     return (
@@ -531,6 +532,18 @@ const ProductDetailsPage = () => {
                 </div>
               </div>
             </div>
+
+            {/* Customer reviews */}
+              <ProductReviews
+                productId={product._id}
+                onReviewChanged={async () => {
+                  const response = await axios.get(
+                    `/products/${product._id}`
+                  );
+
+                  setProduct(response.data);
+                }}
+              />
 
         {/* Related products */}
         {relatedProducts.length > 0 && (
