@@ -7,7 +7,7 @@ const CategoryItem = ({ category }) => {
   return (
     <Link
       to={`/category/${encodeURIComponent(category.slug)}`}
-      className="group relative block h-44 w-full overflow-hidden rounded-lg sm:h-48 lg:h-52"
+      className="group relative block h-[88px] min-w-0 w-full overflow-hidden rounded-lg sm:h-48 lg:h-52"
     >
       <img
         src={category.imageUrl}
@@ -20,8 +20,8 @@ const CategoryItem = ({ category }) => {
       <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent" />
 
       {/* Category information */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 p-2 sm:p-4">
-        <h3 className="mb-1 text-sm font-bold leading-tight text-white sm:text-xl lg:text-2xl">
+      <div className="absolute bottom-0 left-0 right-0 z-10 p-1 sm:p-4">
+        <h3 className="text-[10px] font-semibold leading-[1.15] break-words text-white sm:mb-1 sm:text-xl sm:font-bold lg:text-2xl">
           {category.name}
         </h3>
 

@@ -1,5 +1,6 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   ShoppingCart,
   UserRound,
@@ -24,6 +25,7 @@ const Navbar = () => {
   const { user, logout } = useUserStore();
   const { cartItems } = useCartStore();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const isAdmin = user?.role === "admin";
   const cartCount = cartItems?.length || 0;
@@ -31,6 +33,29 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const closeMenu = () => setMenuOpen(false);
+
+useEffect(() => {
+  if (!menuOpen) return;
+
+  const handleEscape = (event) => {
+    if (event.key === "Escape") {
+      setMenuOpen(false);
+    }
+  };
+
+  const previousOverflow = document.body.style.overflow;
+
+  // Prevent the homepage from scrolling behind the drawer.
+  document.body.style.overflow = "hidden";
+
+  document.addEventListener("keydown", handleEscape);
+
+  return () => {
+    document.body.style.overflow = previousOverflow;
+    document.removeEventListener("keydown", handleEscape);
+  };
+}, [menuOpen]);
+
 
   const handleLogout = () => {
     closeMenu();
@@ -52,6 +77,10 @@ const Navbar = () => {
 
 
   const { pathname } = useLocation();
+  // Close the drawer when navigating to a different page.
+useEffect(() => {
+  setMenuOpen(false);
+}, [pathname]);
 
   
 
@@ -130,15 +159,30 @@ const showSecondaryNav =
   </div>
 </div>
 
-      <div className="container relative mx-auto navbar-container">
-        <Link
+      <div className="container relative mx-auto navbar-container max-md:!justify-start max-md:!gap-2">
+
+          {/* Hamburger */}
+          <button
+            type="button"
+            onClick={() => setMenuOpen((prev) => !prev)}
+            className="flex h-10 w-9 shrink-0 items-center justify-center text-red-500 hover:text-white md:hidden"
+            aria-label="Open navigation"
+            aria-expanded={menuOpen}
+            aria-controls="mobile-navigation"
+          >
+            <Menu size={19} />
+          </button>
+
+          {/* Logo */}
+          <Link
+
           to="/"
           onClick={(e) => {
             e.preventDefault();
             closeMenu();
             scrollToHome(navigate, pathname);
           }}
-          className="logo-link"
+          className="logo-link max-md:!max-w-none"
         >
           The Uncanny Collection
         </Link>
@@ -153,7 +197,7 @@ const showSecondaryNav =
       
 
           <div className="flex w-full overflow-hidden rounded-xl border border-[#76505a] bg-[#271923] focus-within:border-red-500">
-            <Search className="my-auto ml-4 shrink-0 text-gray-400" size={20} />
+            <Search className="my-auto ml-4 shrink-0 text-gray-400" size={21} />
 
             <input
               type="search"
@@ -246,82 +290,260 @@ const showSecondaryNav =
           )}
         </nav>
 
-        {/* Mobile navigation controls */}
-        <div className="flex items-center gap-5 md:hidden">
-          {user && (
+        
+          {/* Mobile navigation controls — right side */}
+          <div className="ml-auto flex shrink-0 items-center gap-3 md:hidden">
+
+            {/* Search icon */}
+            <button
+              type="button"
+              onClick={() => setMobileSearchOpen((previous) => !previous)}
+              aria-label={mobileSearchOpen ? "Close search" : "Open search"}
+              aria-expanded={mobileSearchOpen}
+              className="flex h-9 w-9 shrink-0 items-center justify-center text-red-500 transition-colors hover:text-white"
+            >
+              <Search size={19} />
+            </button>
+
+            {/* Cart icon */}
             <Link
-              to="/cart"
+              to={user ? "/cart" : "/login"}
               onClick={closeMenu}
-              className="cart-link"
+              className="cart-link relative flex h-9 w-9 shrink-0 items-center justify-center"
               aria-label={`Cart, ${cartCount} items`}
             >
-              <ShoppingCart size={22} />
-              <span className="cart-badge">{cartCount}</span>
-            </Link>
-          )}
+              <ShoppingCart size={19} />
 
-          <button
-            type="button"
-            onClick={() => setMenuOpen((prev) => !prev)}
-            className="text-red-500 hover:text-white"
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={menuOpen}
-            aria-controls="mobile-navigation"
-          >
-            {menuOpen ? <X size={26} /> : <Menu size={26} />}
-          </button>
-        </div>
+              {cartCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+
+          </div>
+
       </div>
 
-      {/* Mobile dropdown */}
-      {menuOpen && (
-        <nav
-          id="mobile-navigation"
-          className="border-t border-red-900 bg-gray-900 px-5 py-4 md:hidden"
-        >
-          <div className="flex flex-col gap-4">
-            <Link to="/" onClick={closeMenu} className="nav-link">
-              Home
-            </Link>
 
-            {isAdmin && (
-              <Link
-                to="/dashboard"
-                onClick={closeMenu}
-                className="nav-link"
-              >
-                Dashboard
-              </Link>
-            )}
+        {/* Expandable mobile search */}
+        {showMarketplaceTools && mobileSearchOpen && (
+          <form
+            onSubmit={(event) => {
+              handleSearch(event);
+              setMobileSearchOpen(false);
+            }}
+            role="search"
+            className="border-t border-red-900/50 bg-[#17121b] px-3 py-3 md:hidden"
+          >
+            <div className="flex overflow-hidden rounded-lg border border-[#76505a] bg-[#271923] focus-within:border-red-500">
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search cursed artifacts..."
+                aria-label="Search products"
+                autoFocus
+                className="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-sm text-white outline-none placeholder:text-gray-400"
+              />
 
-            {user ? (
               <button
-                onClick={handleLogout}
-                className="text-left text-red-500 hover:text-white"
+                type="submit"
+                aria-label="Submit search"
+                className="flex min-w-11 items-center justify-center bg-[#922638] text-white"
               >
-                Logout
+                <Search size={19} />
               </button>
-            ) : (
-              <>
-                <Link
-                  to="/signup"
-                  onClick={closeMenu}
-                  className="nav-link"
-                >
-                  Sign Up
-                </Link>
-                <Link
-                  to="/login"
-                  onClick={closeMenu}
-                  className="nav-link"
-                >
-                  Login
-                </Link>
-              </>
-            )}
+            </div>
+          </form>
+        )}
+
+
+      
+{/* Modern mobile slide-out drawer */}
+{createPortal(
+  <>
+    {/* Dark overlay behind the drawer */}
+    <div
+      className={`fixed inset-0 z-[100] bg-black/70 backdrop-blur-[2px] transition-opacity duration-300 md:hidden ${
+        menuOpen
+          ? "visible opacity-100"
+          : "invisible pointer-events-none opacity-0"
+      }`}
+      onClick={closeMenu}
+      aria-hidden="true"
+    />
+
+    {/* Left-side navigation drawer */}
+    <aside
+      id="mobile-navigation"
+      role="dialog"
+      aria-modal={menuOpen ? "true" : undefined}
+      aria-label="Mobile navigation"
+      aria-hidden={!menuOpen}
+      inert={!menuOpen}
+      className={`fixed inset-y-0 left-0 z-[101] flex w-[280px] max-w-[85vw] flex-col border-r border-[#69404b] bg-[#150f16] text-white shadow-2xl shadow-black/70 transition-transform duration-300 ease-out md:hidden ${
+        menuOpen ? "translate-x-0" : "-translate-x-full"
+      }`}
+    >
+      {/* Drawer header */}
+      <div className="flex shrink-0 items-center justify-between border-b border-[#69404b] px-4 py-4">
+        <div>
+          <h2 className="text-sm font-bold text-red-400">
+            The Uncanny Collection
+          </h2>
+          <p className="mt-1 text-[10px] text-gray-400">
+            Enter at your own risk.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={closeMenu}
+          aria-label="Close navigation"
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-300 transition-colors hover:bg-red-950/50 hover:text-white"
+        >
+          <X size={22} />
+        </button>
+      </div>
+
+      {/* Independently scrolling drawer content */}
+      <nav className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain px-3 py-4">
+        {/* Account */}
+        {user ? (
+          <div className="rounded-lg border border-[#69404b] bg-[#301b26] px-3 py-3">
+            <div className="flex items-center gap-3">
+              <UserRound size={21} className="text-red-400" />
+
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-white">
+                  {user.username || user.name || "Cursed Member"}
+                </p>
+                <p className="truncate text-xs text-gray-400">
+                  {user.email}
+                </p>
+              </div>
+            </div>
           </div>
-        </nav>
-      )}
+        ) : (
+          <Link
+            to="/login"
+            onClick={closeMenu}
+            className="flex min-h-12 items-center gap-3 rounded-lg bg-[#351c27] px-3 text-sm font-semibold text-white hover:bg-[#522333]"
+          >
+            <UserRound size={20} className="text-red-300" />
+            Login / Sign Up
+          </Link>
+        )}
+
+        {/* Cart */}
+        <Link
+          to={user ? "/cart" : "/login"}
+          onClick={closeMenu}
+          className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm hover:bg-red-950/40"
+        >
+          <ShoppingCart size={20} className="text-red-400" />
+          <span className="flex-1">My Cart</span>
+          <span className="rounded-full bg-red-800 px-2 py-0.5 text-xs">
+            {cartCount}
+          </span>
+        </Link>
+
+        {/* Admin dashboard */}
+        {isAdmin && (
+          <Link
+            to="/dashboard"
+            onClick={closeMenu}
+            className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm hover:bg-red-950/40"
+          >
+            <Lock size={20} className="text-red-400" />
+            <span className="flex-1">Dashboard</span>
+            <span className="text-[10px] text-red-300">
+              ADMIN
+            </span>
+          </Link>
+        )}
+
+        {/* Wishlist */}
+        <Link
+          to={user ? "/wishlist" : "/login"}
+          onClick={closeMenu}
+          className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm hover:bg-red-950/40"
+        >
+          <Heart size={20} className="text-red-400" />
+          My Wishlist
+        </Link>
+
+        {/* Currency selector */}
+        <div className="border-t border-[#69404b] px-2 py-3">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-red-300">
+            Currency
+          </p>
+
+          <CurrencySelector />
+        </div>
+
+        
+        {/* Categories and filters from the marketplace */}
+        <div
+          id="mobile-marketplace-tools"
+          className="space-y-3"
+          aria-label="Mobile marketplace categories and filters"
+        />
+
+
+        {/* Curse Club */}
+        <div className="mt-4 rounded-xl border border-red-700/50 bg-gradient-to-br from-[#451a27] to-[#21131d] p-4">
+          <div className="flex items-center gap-2 text-amber-300">
+            <span>👑</span>
+            <span className="text-sm font-semibold">
+              Join the Curse Club
+            </span>
+          </div>
+
+          <p className="mt-2 text-xs leading-relaxed text-gray-300">
+            Exclusive artifacts, early access, and
+            members-only deals.
+          </p>
+
+          <span className="mt-3 inline-block rounded-full border border-amber-500/30 px-2 py-1 text-[10px] font-semibold text-amber-300">
+            COMING SOON
+          </span>
+        </div>
+
+        {/* Help & Contact */}
+        <button
+          type="button"
+          onClick={() => {
+            closeMenu();
+            document.getElementById("contact")?.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }}
+          className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm text-gray-200 hover:bg-red-950/40"
+        >
+          <span className="text-lg text-red-400">ⓘ</span>
+          Help & Contact
+        </button>
+
+        {/* Logout */}
+        {user && (
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm text-red-400 hover:bg-red-950/40"
+          >
+            <UserRound size={20} />
+            Logout
+          </button>
+        )}
+      </nav>
+    </aside>
+  </>,
+  document.body
+)}
+
 
             
       {/* Secondary marketplace navigation */}

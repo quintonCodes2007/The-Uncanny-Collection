@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Link, useSearchParams, useLocation } from "react-router-dom";
 import { Ghost, PackageOpen, ArrowLeft } from "lucide-react";
+import { createPortal } from "react-dom";
 
 import axios from "../lib/axios";
 import ProductCard from "./ProductCard";
@@ -38,6 +39,28 @@ const MarketplaceCatalog = ({
   children,
 }) => {
   const { pathname } = useLocation();
+
+// Determine whether we're using the mobile layout.
+const [isMobile, setIsMobile] = useState(
+  () => window.matchMedia("(max-width: 767px)").matches
+);
+
+useEffect(() => {
+  const mediaQuery = window.matchMedia("(max-width: 767px)");
+
+  const handleScreenChange = (event) => {
+    setIsMobile(event.matches);
+  };
+
+  mediaQuery.addEventListener("change", handleScreenChange);
+
+  return () => {
+    mediaQuery.removeEventListener("change", handleScreenChange);
+  };
+}, []);
+
+
+
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [products, setProducts] = useState([]);
@@ -318,24 +341,42 @@ useEffect(() => {
       <div className="relative z-10 mx-auto w-full max-w-[1800px] px-3 sm:px-5 xl:px-8">
         <div className="flex flex-col items-start gap-6 lg:flex-row">
 
-          {/* Sidebar */}
-            <div className="w-full min-w-0 space-y-3 lg:w-[195px] lg:shrink-0 xl:w-[205px]">
+          
+        {/* Desktop / tablet marketplace sidebar */}
+        {!isMobile && (
+          <div className="w-full min-w-0 space-y-3 lg:w-[195px] lg:shrink-0 xl:w-[205px]">
+            <MarketplaceSidebar />
+
+            <MarketplaceFilters
+              products={collectionProducts}
+              maxPrice={maxPrice}
+              setMaxPrice={(value) => setFilter("maxPrice", value)}
+              availability={availability}
+              setAvailability={(value) => setFilter("availability", value)}
+            />
+
+            <DeliveryCard />
+          </div>
+        )}
+
+        {/* Mobile marketplace controls inside the slide-out drawer */}
+        {isMobile &&
+          document.getElementById("mobile-marketplace-tools") &&
+          createPortal(
+            <div className="space-y-3">
               <MarketplaceSidebar />
 
               <MarketplaceFilters
                 products={collectionProducts}
                 maxPrice={maxPrice}
-                setMaxPrice={(value) =>
-                  setFilter("maxPrice", value)
-                }
+                setMaxPrice={(value) => setFilter("maxPrice", value)}
                 availability={availability}
-                setAvailability={(value) =>
-                  setFilter("availability", value)
-                }
+                setAvailability={(value) => setFilter("availability", value)}
               />
+            </div>,
+            document.getElementById("mobile-marketplace-tools")
+          )}
 
-              <DeliveryCard />
-            </div>
 
           {/* Main content */}
           <div className="min-w-0 w-full flex-1">

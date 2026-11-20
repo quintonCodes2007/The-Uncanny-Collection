@@ -51,7 +51,7 @@ const HomePage = () => {
           {error}
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:gap-4">
+        <div className="grid grid-cols-5 gap-1.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5 xl:gap-4">
           {featuredCategories.map((category) => (
             <CategoryItem
               key={category._id}

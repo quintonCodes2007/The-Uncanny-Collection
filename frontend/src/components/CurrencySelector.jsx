@@ -97,8 +97,10 @@ const CurrencySelector = () => {
     );
   };
 
+  
   return (
-    <div ref={containerRef} className="relative z-50">
+    <div ref={containerRef} className="relative z-50 min-w-0">
+      {/* Currency selector button */}
       <button
         type="button"
         onClick={() => setOpen((previous) => !previous)}
@@ -117,46 +119,71 @@ const CurrencySelector = () => {
 
         <ChevronDown
           size={15}
-          className={`transition-transform ${
+          className={`transition-transform duration-300 ease-in-out ${
             open ? "rotate-180" : ""
           }`}
         />
       </button>
 
-      {open && (
-        <div
-          id="uncanny-currency-options"
-          role="listbox"
-          aria-label="Choose display currency"
-          className="absolute right-0 top-full z-50 mt-2 max-h-[65vh] w-72 overflow-y-auto rounded-xl border border-[#793342] bg-[#1b1019] p-2 shadow-2xl shadow-black/60"
-        >
-          <div className="border-b border-red-900/50 px-3 py-3">
-            <h3 className="font-bold text-red-200">
-              💀 The Forbidden Exchange
-            </h3>
+      {/* Animated currency options */}
+      <div
+        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out lg:block lg:transition-none ${
+          open
+            ? "grid-rows-[1fr] opacity-100 lg:visible"
+            : "grid-rows-[0fr] opacity-0 lg:invisible lg:pointer-events-none"
+        }`}
+      >
+        <div className="min-h-0 overflow-hidden lg:overflow-visible">
+          <div
+            id="uncanny-currency-options"
+            role="listbox"
+            aria-label="Choose display currency"
+            aria-hidden={!open}
+            inert={!open}
+            className="
+              relative mt-2
+              max-h-[45vh] w-full min-w-0
+              overflow-y-auto overflow-x-hidden
+              rounded-xl
+              border border-[#793342]
+              bg-[#1b1019]
+              p-2
+              shadow-xl shadow-black/40
 
-            <p className="mt-1 text-xs text-gray-400">
-              Every currency has a price.
-            </p>
+              lg:absolute lg:right-0 lg:top-full
+              lg:z-50 lg:mt-2 lg:max-h-[65vh]
+              lg:w-72 lg:shadow-2xl
+            "
+          >
+            {/* Dropdown heading */}
+            <div className="border-b border-red-900/50 px-3 py-3">
+              <h3 className="font-bold text-red-200">
+                💀 The Forbidden Exchange
+              </h3>
+
+              <p className="mt-1 text-xs text-gray-400">
+                Every currency has a price.
+              </p>
+            </div>
+
+            {/* Real currencies */}
+            {renderGroup("real", "The Mortal Realm")}
+
+            <div className="my-2 border-t border-red-900/40" />
+
+            {/* Fictional currencies */}
+            {renderGroup("cursed", "The Cursed Treasury")}
+
+            <div className="my-2 border-t border-red-900/40" />
+
+            {/* Special currencies */}
+            {renderGroup("special", "Divine Privileges")}
           </div>
-
-          {renderGroup("real", "The Mortal Realm")}
-
-          <div className="my-2 border-t border-red-900/40" />
-
-          {renderGroup("cursed", "The Cursed Treasury")}
-
-          <div className="my-2 border-t border-red-900/40" />
-
-          {renderGroup("special", "Divine Privileges")}
-
-          <p className="px-3 py-3 text-[10px] leading-relaxed text-gray-500">
-            
-          </p>
         </div>
-      )}
+      </div>
     </div>
   );
 };
 
 export default CurrencySelector;
+
