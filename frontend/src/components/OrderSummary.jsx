@@ -1,86 +1,142 @@
-import {motion} from 'framer-motion';
-import { useCartStore } from '../stores/useCartStore';
-import { Link, useNavigate } from 'react-router-dom';
-import { MoveRight } from 'lucide-react';
 
+import { motion } from "framer-motion";
+import { useCartStore } from "../stores/useCartStore";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowRight, ReceiptText } from "lucide-react";
+
+import CurrencyPrice from "./CurrencyPrice";
 
 const OrderSummary = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const {total, subtotal, coupon, isCouponApplied} = useCartStore();
+  // Read the existing cart totals and coupon information.
+  const { total, subtotal, coupon, isCouponApplied } =
+    useCartStore();
 
-    const savings = subtotal - total;
-    const formattedSubtotal = subtotal?.toFixed(2);
-    const formattedTotal = total?.toFixed(2);
-    const formattedSavings = savings?.toFixed(2);
-
-    const handlePayment = async () => {
-        const res = await axios.post('/payments/checkout-session', { products: cart, couponCode: coupon ? coupon?.code : null, });
-    };
+  const savings = Math.max(0, subtotal - total);
 
   return (
-    <motion.div
-    className='space-y-4 rounded-lg border border-gray-700 bg-gray-800 p-4 shadow-sm sm:p-6'
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5 }}
+    <motion.section
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="
+        overflow-hidden rounded-xl
+        border border-[#69404b]
+        bg-[#281b27]
+        p-3 text-white
+        shadow-sm
+        sm:p-5
+      "
     >
-        <p className='text-xl font-semibold text-red-400'>Order Summary</p>
+      {/* SECTION HEADING */}
+      <div className="mb-3 flex items-center gap-2.5">
+        <ReceiptText
+          size={19}
+          className="shrink-0 text-red-400"
+        />
 
-        <div className='space-y-4'>
-            <div className='space-y-2'>
-                <dl className='flex items-center justify-between gap-4'>
-                    <dt className='text-base font-normal text-gray-400'>Original price</dt>
-                    <dd className='text-base font-medium text-white'>${formattedSubtotal}</dd>
-                </dl>
+        <h2 className="text-sm font-semibold text-red-300 sm:text-lg">
+          Order Summary
+        </h2>
+      </div>
 
-                {savings > 0 && (
-                    <dl className='flex items-center justify-between gap-4'>
-                        <dt className='text-base font-normal text-gray-400'>Savings</dt>
-                        <dd className='text-base font-medium text-red-400'>-${formattedSavings}</dd>
-                    </dl>
-                )}
+      {/* PRICE BREAKDOWN */}
+      <div className="space-y-2.5">
 
-                {coupon && isCouponApplied && (
-                    <dl className='flex items-center justify-between gap-4'>
-                        <dt className='text-base font-normal text-gray-400'>Coupon ({coupon.code})</dt>
-                        <dd className='text-base font-medium text-red-400'>-${coupon.discountPercentage}%</dd>
-                    </dl>
-                )}
+        {/* Subtotal */}
+        <div className="flex items-start justify-between gap-3">
+          <span className="text-xs text-gray-400 sm:text-sm">
+            Original price
+          </span>
 
-                <dl className='flex items-center justify-between gap-4 border-t border-gray-600 pt-2'>
-                    <dt className='text-base font-bold text-white'>Total</dt>
-                    <dd className='text-base font-bold text-red-400'>${formattedTotal}</dd>
-                </dl>
+          <CurrencyPrice
+            amount={subtotal}
+            className="min-w-0 break-all text-right text-xs font-medium text-gray-200 sm:text-sm"
+          />
+        </div>
+
+        {/* Savings */}
+        {savings > 0 && (
+          <div className="flex items-start justify-between gap-3">
+            <span className="text-xs text-gray-400 sm:text-sm">
+              Savings
+            </span>
+
+            <div className="flex items-start text-emerald-400">
+              <span>−</span>
+              <CurrencyPrice
+                amount={savings}
+                className="break-all text-right text-xs font-medium sm:text-sm"
+              />
             </div>
+          </div>
+        )}
 
-                <motion.button
-                className="flex w-full items-center justify-center rounded-lg bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
-                
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate('/checkout')}
-                >
-                    Checkout
-                </motion.button>
-                <div className='flex items-center justify-center gap-2'>
-                    <span className='text-sm font-normal text-gray-400'>or</span>
-                    <Link
-                        to='/'
-                        className='inline-flex items-center gap-2 text-sm font-medium text-red-400 underline hover:text-red-300 hover:no-underline'
-                    >
-                        Continue Shopping
-                        <MoveRight size={16} />
-                    </Link>
+        {/* Applied coupon */}
+        {coupon && isCouponApplied && (
+          <div className="flex items-start justify-between gap-3">
+            <span className="min-w-0 break-words text-xs text-gray-400">
+              Coupon applied
+            </span>
 
-                </div>
+            <span className="shrink-0 rounded-md bg-emerald-950/40 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+              {coupon.discountPercentage}% OFF
+            </span>
+          </div>
+        )}
 
-                
-         </div>
-                    
-    </motion.div>
-    
-  )
-}
+        {/* TOTAL */}
+        <div className="flex items-start justify-between gap-3 border-t border-[#69404b] pt-3">
+          <span className="text-sm font-bold text-white sm:text-base">
+            Total
+          </span>
 
-export default OrderSummary
+          <CurrencyPrice
+            amount={total}
+            className="min-w-0 break-all text-right text-lg font-bold leading-tight text-red-400 sm:text-xl"
+          />
+        </div>
+      </div>
+
+      {/* CHECKOUT BUTTON */}
+      <motion.button
+        type="button"
+        onClick={() => navigate("/checkout")}
+        whileTap={{ scale: 0.98 }}
+        className="
+          mt-4 flex min-h-11 w-full
+          items-center justify-center gap-2
+          rounded-lg border border-red-500/40
+          bg-[#b91c32] px-4 py-2.5
+          text-sm font-semibold text-white
+          transition-colors duration-200
+          hover:bg-red-600
+          focus-visible:outline-2
+          focus-visible:outline-offset-2
+          focus-visible:outline-red-400
+        "
+      >
+        Checkout
+        <ArrowRight size={17} />
+      </motion.button>
+
+      {/* CONTINUE SHOPPING */}
+      <Link
+        to="/"
+        className="
+          mt-3 flex min-h-9 items-center
+          justify-center gap-2 text-xs
+          font-medium text-red-300
+          transition-colors hover:text-red-200
+        "
+      >
+        Continue Shopping
+        <ArrowRight size={14} />
+      </Link>
+
+    </motion.section>
+  );
+};
+
+export default OrderSummary;

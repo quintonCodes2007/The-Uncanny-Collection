@@ -56,6 +56,7 @@ const destinations = [
 ];
 
 
+
 const DeliveryDestination = () => {
   const [selected, setSelected] = useState("");
   const [expanded, setExpanded] = useState(false);
@@ -67,7 +68,9 @@ const DeliveryDestination = () => {
   return (
     <section className="overflow-hidden rounded-xl border border-[#69404b] bg-[#281b27] text-white">
 
-      {/* Compact accordion header */}
+      {/* ======================================
+          COMPACT DESTINATION HEADER
+      ====================================== */}
       <button
         type="button"
         onClick={() => setExpanded((prev) => !prev)}
@@ -75,7 +78,10 @@ const DeliveryDestination = () => {
         aria-controls="destination-options"
         className="flex min-h-14 w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-red-950/20"
       >
-        <MapPin size={19} className="shrink-0 text-red-400" />
+        <MapPin
+          size={19}
+          className="shrink-0 text-red-400"
+        />
 
         <div className="min-w-0 flex-1">
           <h2 className="text-sm font-semibold text-red-300">
@@ -89,70 +95,100 @@ const DeliveryDestination = () => {
 
         <ChevronDown
           size={18}
-          className={`shrink-0 text-gray-400 transition-transform duration-300 ${
+          className={`shrink-0 text-gray-400 transition-transform duration-300 ease-in-out ${
             expanded ? "rotate-180" : ""
           }`}
         />
       </button>
 
-      {/* Expandable destination controls */}
-      {expanded && (
-        <div
-          id="destination-options"
-          className="space-y-3 border-t border-[#69404b] px-3 py-3"
-        >
-          <label
-            htmlFor="delivery-destination"
-            className="block text-xs font-medium text-gray-300"
+      {/* ======================================
+          SMOOTH EXPANDING DESTINATION LIST
+      ====================================== */}
+      <div
+        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+          expanded
+            ? "grid-rows-[1fr] opacity-100"
+            : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div
+            id="destination-options"
+            aria-hidden={!expanded}
+            inert={!expanded}
+            className="border-t border-[#69404b] px-2 py-2"
           >
-            Delivery Realm
-          </label>
+            <p className="px-2 pb-2 text-[10px] font-semibold uppercase tracking-wider text-red-300">
+              Available Delivery Realms
+            </p>
 
-          <select
-            id="delivery-destination"
-            value={selected}
-            onChange={(event) => setSelected(event.target.value)}
-            className="w-full min-w-0 rounded-lg border border-[#69404b] bg-[#21151f] px-3 py-2.5 text-sm text-gray-200 outline-none focus:border-red-500"
-          >
-            <option value="">Select a cursed destination...</option>
+            {/* Scrollable destination options */}
+            <div className="max-h-48 space-y-1 overflow-y-auto overscroll-contain pr-1">
+              {destinations.map((item) => {
+                const isSelected = selected === item.name;
 
-            {destinations.map((item) => (
-              <option key={item.name} value={item.name}>
-                {item.name}
-              </option>
-            ))}
-          </select>
+                return (
+                  <button
+                    key={item.name}
+                    type="button"
+                    aria-pressed={isSelected}
+                    onClick={() => {
+                      setSelected(item.name);
+                      setExpanded(false);
+                    }}
+                    className={`flex min-h-10 w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs transition-colors ${
+                      isSelected
+                        ? "bg-red-900/40 text-red-200"
+                        : "text-gray-300 hover:bg-red-950/30 hover:text-white"
+                    }`}
+                  >
+                    <MapPin
+                      size={14}
+                      className="shrink-0 text-red-400"
+                    />
 
-          {destination && (
-            <div className="rounded-lg bg-red-950/20 p-3">
-              <div className="flex items-center gap-2">
-                <CheckCircle2
-                  size={15}
-                  className="text-emerald-400"
-                />
-                <span className="text-xs font-semibold text-red-300">
-                  Destination Selected
-                </span>
+                    <span className="min-w-0 flex-1">
+                      {item.name}
+                    </span>
+
+                    {isSelected && (
+                      <CheckCircle2
+                        size={15}
+                        className="shrink-0 text-emerald-400"
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Selected realm's fictional warning */}
+            {destination && (
+              <div className="mt-3 rounded-lg border border-red-900/30 bg-red-950/20 p-2.5">
+                <p className="text-[11px] leading-relaxed text-gray-400">
+                  {destination.message}
+                </p>
               </div>
+            )}
 
-              <p className="mt-2 text-xs text-gray-300">
-                {destination.message}
+            {/* Disclaimer */}
+            <div className="mt-3 flex items-start gap-2 border-t border-[#51303d] pt-3">
+              <Ghost
+                size={14}
+                className="shrink-0 text-gray-500"
+              />
+
+              <p className="text-[10px] leading-relaxed text-gray-500">
+                Delivery is purely fictional. Our couriers
+                are not recognized in this dimension.
               </p>
             </div>
-          )}
-
-          <div className="flex items-start gap-2">
-            <Ghost size={14} className="shrink-0 text-gray-500" />
-            <p className="text-[10px] leading-relaxed text-gray-500">
-              Delivery is purely fictional. Our couriers
-              aren't recognized in this dimension.
-            </p>
           </div>
         </div>
-      )}
-
+      </div>
     </section>
   );
 };
 
 export default DeliveryDestination;
+
