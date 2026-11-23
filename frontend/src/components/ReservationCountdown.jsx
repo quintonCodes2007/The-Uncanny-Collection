@@ -64,59 +64,79 @@ useEffect(() => {
 
   if (secondsLeft === null) return null;
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-xl border border-red-500/40 bg-gradient-to-r from-[#2a101c] via-[#371320] to-[#1b1019] p-5 shadow-lg shadow-red-950/20"
-    >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex shrink-0 gap-1 text-xl">
-            <span>🌕</span>
-            <span>🌕</span>
-            <span>🌕</span>
-          </div>
+  
+return (
+  <motion.div
+    initial={{ opacity: 0, y: -8 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+    className="
+      relative overflow-hidden
+      rounded-lg
+      border border-red-500/30
+      px-3 py-2.5
+      shadow-md shadow-red-950/20
+      sm:rounded-xl sm:px-5 sm:py-4
+    "
+    style={{
+      backgroundImage: `
+        radial-gradient(
+          ellipse at 85% 15%,
+          rgba(190, 35, 56, 0.22),
+          transparent 65%
+        ),
+        linear-gradient(
+          110deg,
+          #35151f 0%,
+          #1d111b 60%,
+          #321621 100%
+        )
+      `,
+    }}
+  >
+    {/* Slim countdown content */}
+    <div className="relative z-10 flex items-center gap-2">
 
-          <div>
-            <h3 className="font-serif text-xl font-bold text-red-300">
-              Three Full Moons
-            </h3>
+      {/* Small hourglass icon */}
+      <Hourglass
+        size={18}
+        className="shrink-0 text-red-400"
+      />
 
-            <p className="mt-1 text-sm text-gray-300">
-              Complete your ritual before your artifacts escape.
-            </p>
-          </div>
-        </div>
+      {/* Reservation title */}
+      <div className="min-w-0 flex-1">
+        <h3 className="truncate font-serif text-sm font-semibold text-red-300 sm:text-lg">
+          Three Full Moons
+        </h3>
 
-        <div className="flex items-center gap-3 sm:text-right">
-          <Hourglass className="h-6 w-6 text-red-400" />
-
-          <div>
-            <p className="text-xs uppercase tracking-widest text-red-300">
-              Time Remaining
-            </p>
-
-            <p className="font-mono text-3xl font-bold tabular-nums text-white">
-              {String(minutes).padStart(2, "0")}:
-              {String(seconds).padStart(2, "0")}
-            </p>
-          </div>
-        </div>
+        <p className="mt-0.5 truncate text-[10px] text-gray-400 sm:text-xs">
+          Your reservation is ticking away.
+        </p>
       </div>
 
-      <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-red-950">
-        <div
-          className="h-full rounded-full bg-red-500 transition-all duration-1000"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+      {/* Countdown */}
+      <div className="shrink-0 text-right">
+        <p className="text-[9px] uppercase tracking-wider text-red-300/80">
+          Time Left
+        </p>
 
-      <p className="mt-3 text-xs italic text-red-300/80">
-        Once the moons fade, your reserved items return to the darkness.
-      </p>
-    </motion.div>
-  );
+        <p className="font-mono text-xl font-bold leading-tight tabular-nums text-white sm:text-2xl">
+          {String(minutes).padStart(2, "0")}:
+          {String(seconds).padStart(2, "0")}
+        </p>
+      </div>
+    </div>
+
+    {/* Thin reservation progress bar */}
+    <div className="mt-2 h-[3px] overflow-hidden rounded-full bg-red-950/80">
+      <div
+        className="h-full rounded-full bg-gradient-to-r from-red-600 to-rose-400 transition-[width] duration-1000 ease-linear"
+        style={{ width: `${progress}%` }}
+      />
+    </div>
+  </motion.div>
+);
+
 };
 
 export default ReservationCountdown;

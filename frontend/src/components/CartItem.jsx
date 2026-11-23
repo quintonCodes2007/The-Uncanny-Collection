@@ -1,86 +1,94 @@
-import {Minus, Plus, Trash} from 'lucide-react';
-import { useCartStore } from '../stores/useCartStore';
+
+import { Minus, Plus, Trash2 } from "lucide-react";
+import { useCartStore } from "../stores/useCartStore";
+import CurrencyPrice from "./CurrencyPrice";
 
 const CartItem = ({ item }) => {
-    
-    const { updateQuantity, removeFromCart } = useCartStore();
+  const updateQuantity = useCartStore(
+    (state) => state.updateQuantity
+  );
 
+  const removeFromCart = useCartStore(
+    (state) => state.removeFromCart
+  );
 
-return (
-  <div className="rounded-lg border border-gray-700 bg-gray-800 p-3 shadow-sm sm:p-4 md:p-6">
-    <div className="flex items-start gap-3 sm:gap-5">
+  return (
+    <article className="rounded-xl border border-[#543440] bg-[#2b202b] p-2.5 shadow-sm sm:p-4">
 
-      {/* Product image */}
-      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg sm:h-28 sm:w-28">
+      <div className="flex items-center gap-3">
+
+        {/* COMPACT PRODUCT IMAGE */}
         <img
           src={item.image}
           alt={item.name}
-          className="h-full w-full object-cover"
+          className="h-[64px] w-[64px] shrink-0 rounded-lg object-cover sm:h-28 sm:w-28"
         />
-      </div>
 
-      {/* Product information */}
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        {/* PRODUCT DETAILS */}
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
 
-        <h3 className="text-sm font-semibold text-white break-words sm:text-lg">
-          {item.name}
-        </h3>
+          {/* Name */}
+          <h3 className="line-clamp-2 text-xs font-semibold leading-4 text-white sm:text-lg">
+            {item.name}
+          </h3>
 
-        <p className="line-clamp-2 text-xs text-gray-400 sm:text-sm">
-          {item.description}
-        </p>
+          {/* Description — desktop only */}
+          <p className="hidden text-sm text-gray-400 sm:line-clamp-2">
+            {item.description}
+          </p>
 
-        <p className="text-base font-bold text-red-400 sm:text-lg">
-          ${(item.price * item.quantity).toFixed(2)}
-        </p>
+          {/* Price */}
+          <CurrencyPrice
+            amount={item.price * item.quantity}
+            className="text-sm font-bold text-red-400 sm:text-lg"
+          />
 
-        {/* Quantity and remove controls */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+          {/* QUANTITY CONTROLS */}
+          <div className="mt-1 flex items-center gap-2">
 
-          <div className="flex items-center gap-3">
             <button
               type="button"
-              aria-label={`Decrease quantity of ${item.name}`}
-              disabled={item.quantity <= 1}
               onClick={() =>
                 updateQuantity(item._id, item.quantity - 1)
               }
-              className="flex h-9 w-9 items-center justify-center rounded-md border border-gray-600 bg-gray-700 text-gray-300 hover:bg-gray-600 disabled:opacity-40"
+              disabled={item.quantity <= 1}
+              aria-label={`Decrease quantity of ${item.name}`}
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-[#62404b] bg-[#44303c] text-gray-200 transition-colors hover:bg-[#604052] disabled:opacity-40"
             >
-              <Minus size={16} />
+              <Minus size={14} />
             </button>
 
-            <span className="text-sm font-medium text-white">
+            <span className="min-w-4 text-center text-xs font-semibold text-white">
               {item.quantity}
             </span>
 
             <button
               type="button"
-              aria-label={`Increase quantity of ${item.name}`}
               onClick={() =>
                 updateQuantity(item._id, item.quantity + 1)
               }
-              className="flex h-9 w-9 items-center justify-center rounded-md border border-gray-600 bg-gray-700 text-gray-300 hover:bg-gray-600"
+              aria-label={`Increase quantity of ${item.name}`}
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-[#62404b] bg-[#44303c] text-gray-200 transition-colors hover:bg-[#604052]"
             >
-              <Plus size={16} />
+              <Plus size={14} />
             </button>
+
           </div>
-
-          <button
-            type="button"
-            aria-label={`Remove ${item.name} from cart`}
-            onClick={() => removeFromCart(item._id)}
-            className="flex h-9 w-9 items-center justify-center rounded-md text-red-400 hover:bg-red-900/30 hover:text-red-300"
-          >
-            <Trash size={18} />
-          </button>
-
         </div>
-      </div>
-    </div>
-  </div>
-);
 
+        {/* REMOVE PRODUCT */}
+        <button
+          type="button"
+          onClick={() => removeFromCart(item._id)}
+          aria-label={`Remove ${item.name} from cart`}
+          className="flex h-10 w-9 shrink-0 items-center justify-center rounded-lg text-red-400 transition-colors hover:bg-red-950/40 hover:text-red-300"
+        >
+          <Trash2 size={17} />
+        </button>
+
+      </div>
+    </article>
+  );
 };
 
-export default CartItem
+export default CartItem;

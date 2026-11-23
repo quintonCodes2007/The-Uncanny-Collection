@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { MapPin, Ghost, CheckCircle2 } from "lucide-react";
+import { MapPin, Ghost, CheckCircle2, ChevronDown } from "lucide-react";
 
 const destinations = [
   {
@@ -55,111 +55,102 @@ const destinations = [
   },
 ];
 
+
 const DeliveryDestination = () => {
   const [selected, setSelected] = useState("");
+  const [expanded, setExpanded] = useState(false);
 
   const destination = destinations.find(
     (item) => item.name === selected
   );
 
   return (
-    <section className='space-y-4 rounded-lg border border-gray-700 bg-gray-800 p-4 shadow-sm sm:p-6'>
-      {/* Heading */}
-      <div className="mb-2 flex items-center gap-2">
+    <section className="overflow-hidden rounded-xl border border-[#69404b] bg-[#281b27] text-white">
+
+      {/* Compact accordion header */}
+      <button
+        type="button"
+        onClick={() => setExpanded((prev) => !prev)}
+        aria-expanded={expanded}
+        aria-controls="destination-options"
+        className="flex min-h-14 w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-red-950/20"
+      >
         <MapPin size={19} className="shrink-0 text-red-400" />
 
-        <h2 className="text-lg font-semibold text-red-400">
-          Choose Your Destination
-        </h2>
-      </div>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-sm font-semibold text-red-300">
+            Choose Your Destination
+          </h2>
 
-      <p className="mb-4 text-xs leading-relaxed text-gray-400">
-        Where shall we send your questionable purchase?
-      </p>
-
-      {/* Destination selector */}
-      <label
-        htmlFor="delivery-destination"
-        className="mb-2 block text-xs font-medium text-gray-300"
-      >
-        Delivery Realm
-      </label>
-
-      <select
-        id="delivery-destination"
-        value={selected}
-        onChange={(event) =>
-          setSelected(event.target.value)
-        }
-        className="w-full cursor-pointer rounded-lg border border-[#69404b] bg-gray-800 px-3 py-3 text-sm text-gray-200 outline-none transition-colors focus:border-red-500 focus:ring-1 focus:ring-red-500"
-      >
-        <option
-          value=""
-          style={{
-            backgroundColor: "#2b1a27",
-            color: "#e5e7eb",
-          }}
-        >
-          Select a cursed destination...
-        </option>
-
-        {destinations.map((item) => (
-          <option
-            key={item.name}
-            value={item.name}
-            style={{
-              backgroundColor: "#2b1a27",
-              color: "#e5e7eb",
-            }}
-          >
-            {item.name}
-          </option>
-        ))}
-      </select>
-
-      {/* Selected destination */}
-      {destination ? (
-        <div
-          aria-live="polite"
-          className="mt-4 rounded-lg border border-[#51303d] bg-gray-800 p-3"
-        >
-          <div className="mb-2 flex items-center gap-2">
-            <CheckCircle2
-              size={15}
-              className="text-emerald-400"
-            />
-
-            <span className="text-xs font-semibold text-red-300">
-              Destination Selected
-            </span>
-          </div>
-
-          <p className="text-sm font-medium text-gray-200">
-            {destination.name}
-          </p>
-
-          <p className="mt-2 text-xs leading-relaxed text-gray-400">
-            {destination.message}
+          <p className="mt-0.5 truncate text-[11px] text-gray-400">
+            {selected || "Select your cursed delivery realm"}
           </p>
         </div>
-      ) : (
-        <p className="mt-3 text-xs italic text-gray-500">
-          No destination selected. Your artifact is currently wandering.
-        </p>
+
+        <ChevronDown
+          size={18}
+          className={`shrink-0 text-gray-400 transition-transform duration-300 ${
+            expanded ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+
+      {/* Expandable destination controls */}
+      {expanded && (
+        <div
+          id="destination-options"
+          className="space-y-3 border-t border-[#69404b] px-3 py-3"
+        >
+          <label
+            htmlFor="delivery-destination"
+            className="block text-xs font-medium text-gray-300"
+          >
+            Delivery Realm
+          </label>
+
+          <select
+            id="delivery-destination"
+            value={selected}
+            onChange={(event) => setSelected(event.target.value)}
+            className="w-full min-w-0 rounded-lg border border-[#69404b] bg-[#21151f] px-3 py-2.5 text-sm text-gray-200 outline-none focus:border-red-500"
+          >
+            <option value="">Select a cursed destination...</option>
+
+            {destinations.map((item) => (
+              <option key={item.name} value={item.name}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+
+          {destination && (
+            <div className="rounded-lg bg-red-950/20 p-3">
+              <div className="flex items-center gap-2">
+                <CheckCircle2
+                  size={15}
+                  className="text-emerald-400"
+                />
+                <span className="text-xs font-semibold text-red-300">
+                  Destination Selected
+                </span>
+              </div>
+
+              <p className="mt-2 text-xs text-gray-300">
+                {destination.message}
+              </p>
+            </div>
+          )}
+
+          <div className="flex items-start gap-2">
+            <Ghost size={14} className="shrink-0 text-gray-500" />
+            <p className="text-[10px] leading-relaxed text-gray-500">
+              Delivery is purely fictional. Our couriers
+              aren't recognized in this dimension.
+            </p>
+          </div>
+        </div>
       )}
 
-      {/* Disclaimer */}
-      <div className="mt-4 flex items-start gap-2 border-t border-[#51303d] pt-3">
-        <Ghost
-          size={15}
-          className="mt-0.5 shrink-0 text-gray-500"
-        />
-
-        <p className="text-[11px] leading-relaxed text-gray-500">
-          Delivery is purely fictional. Our couriers are
-          not legally recognized in this dimension.
-        </p>
-      </div>
     </section>
   );
 };
