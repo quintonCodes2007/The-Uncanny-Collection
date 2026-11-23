@@ -8,6 +8,8 @@ import {
   ArrowRight,
   Loader,
   AtSign,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { motion } from 'framer-motion';
 import { useUserStore } from '../stores/useUserStore.js';
@@ -21,6 +23,10 @@ const SignUpPage = () => {
   password: "",
   confirmPassword: "",
 });
+
+// Show or hide each password independently
+const [showPassword, setShowPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
    const { signup, loading } = useUserStore();
 
@@ -142,46 +148,99 @@ const SignUpPage = () => {
             </div>
             </div> 
 
-           <div>
-            {/* <label htmlFor="name" className='block text-sm font-medium text-gray-300'>
-              Full name
-            </label> */}
-            <div className='mt-1 relative rounded-md shadow-sm'>
-              <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                <Lock className='h-5 w-5 text-gray-400' aria-hidden='true' />
-              </div>
-              <input
-                id='password'
-                type='password'
-                required
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className='block w-full pl-10 px-3 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm'
-                placeholder='Password'
-              />
-            </div>
-            </div> 
+           
+{/* ================================
+    PASSWORD FIELD
+================================ */}
+<div>
+  <div className="relative mt-1 rounded-md shadow-sm">
 
-           <div>
-            {/* <label htmlFor="name" className='block text-sm font-medium text-gray-300'>
-              Full name
-            </label> */}
-            <div className='mt-1 relative rounded-md shadow-sm'>
-              <div className='absolute inset-y-0 left-0 pl-3 flex 
-              items-center pointer-events-none'>
-                <Lock className='h-5 w-5 text-gray-400' aria-hidden='true' />
-              </div>
-              <input
-                id='confirmPassword'
-                type='password'
-                required
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                className='block w-full pl-10 px-3 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm'
-                placeholder='Confirm Password'
-              />
-            </div>
-            </div>
+    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+      <Lock className="h-5 w-5 text-gray-400" />
+    </div>
+
+    <input
+      id="password"
+      type={showPassword ? "text" : "password"}
+      autoComplete="new-password"
+      required
+      value={formData.password}
+      onChange={(e) =>
+        setFormData({
+          ...formData,
+          password: e.target.value,
+        })
+      }
+      className="block w-full rounded-md border border-gray-700 py-2 pl-10 pr-12 focus:border-red-500 focus:outline-none focus:ring-red-500 sm:text-sm"
+      placeholder="Password"
+    />
+
+    <button
+      type="button"
+      onClick={() => setShowPassword((prev) => !prev)}
+      aria-label={showPassword ? "Hide password" : "Show password"}
+      aria-pressed={showPassword}
+      className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-gray-400 transition-colors hover:text-red-400"
+    >
+      {showPassword ? (
+        <EyeOff size={19} />
+      ) : (
+        <Eye size={19} />
+      )}
+    </button>
+
+  </div>
+</div>
+
+{/* ================================
+    CONFIRM PASSWORD FIELD
+================================ */}
+<div>
+  <div className="relative mt-1 rounded-md shadow-sm">
+
+    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+      <Lock className="h-5 w-5 text-gray-400" />
+    </div>
+
+    <input
+      id="confirmPassword"
+      type={showConfirmPassword ? "text" : "password"}
+      autoComplete="new-password"
+      required
+      value={formData.confirmPassword}
+      onChange={(e) =>
+        setFormData({
+          ...formData,
+          confirmPassword: e.target.value,
+        })
+      }
+      className="block w-full rounded-md border border-gray-700 py-2 pl-10 pr-12 focus:border-red-500 focus:outline-none focus:ring-red-500 sm:text-sm"
+      placeholder="Confirm Password"
+    />
+
+    <button
+      type="button"
+      onClick={() =>
+        setShowConfirmPassword((prev) => !prev)
+      }
+      aria-label={
+        showConfirmPassword
+          ? "Hide confirmation password"
+          : "Show confirmation password"
+      }
+      aria-pressed={showConfirmPassword}
+      className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-gray-400 transition-colors hover:text-red-400"
+    >
+      {showConfirmPassword ? (
+        <EyeOff size={19} />
+      ) : (
+        <Eye size={19} />
+      )}
+    </button>
+
+  </div>
+</div>
+
 
            <button 
            type='submit' className='w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-700 hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out disabled:opacity-50' disabled={loading}
