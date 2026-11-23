@@ -6,7 +6,7 @@ import Product from "../models/product.model.js";
 import { redis } from "../lib/redis.js";
 
 // Validate review input before saving
-const validateReview = (body) => {
+const validateReview = (body, allowLegacyComment = false) => {
   const { rating, title, comment } = body;
 
   if (
@@ -28,9 +28,9 @@ const validateReview = (body) => {
   if (
     typeof comment !== "string" ||
     comment.trim().length < 10 ||
-    comment.trim().length > 1000
+    (comment.trim().length > 500 && !allowLegacyComment)
   ) {
-    return "Review comment must contain 10–1000 characters";
+    return "Review comment must contain 10–500 characters";
   }
 
   return null;
@@ -231,7 +231,7 @@ export const createReview = async (req, res) => {
 export const updateMyReview = async (req, res) => {
   try {
     const { productId } = req.params;
-    const error = validateReview(req.body);
+    
 
     if (!mongoose.isValidObjectId(productId)) {
       return res.status(400).json({
@@ -239,9 +239,6 @@ export const updateMyReview = async (req, res) => {
       });
     }
 
-    if (error) {
-      return res.status(400).json({ message: error });
-    }
 
     const review = await Review.findOne({
       product: productId,
@@ -253,6 +250,31 @@ export const updateMyReview = async (req, res) => {
         message: "You have not reviewed this artifact yet",
       });
     }
+
+
+  /*
+  * REVIEW LIMIT — LEGACY COMPATIBILITY
+  *
+  * Existing reviews longer than 500 characters remain valid
+  * if the original comment has not been changed.
+  *
+  * Newly written or modified comments must be 500 characters
+  * or fewer.
+  */
+  const allowLegacyComment =
+    typeof req.body.comment === "string" &&
+    review.comment.length > 500 &&
+    req.body.comment.trim() === review.comment;
+
+  const error = validateReview(
+    req.body,
+    allowLegacyComment
+  );
+
+  if (error) {
+    return res.status(400).json({ message: error });
+  }
+
 
     review.rating = req.body.rating;
     review.title = req.body.title.trim();

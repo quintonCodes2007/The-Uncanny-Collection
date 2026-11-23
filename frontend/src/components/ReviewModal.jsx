@@ -17,6 +17,7 @@ const ReviewModal = ({
   const [comment, setComment] = useState("");
 
   const editing = Boolean(existingReview);
+  const MAX_COMMENT_LENGTH = 500;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -49,13 +50,20 @@ const ReviewModal = ({
 
   if (!isOpen) return null;
 
+  // Keep older reviews intact if their original text is unchanged.
+  const legacyCommentUnchanged =
+  editing &&
+  existingReview?.comment?.length > MAX_COMMENT_LENGTH &&
+  comment === existingReview.comment;
+
   const valid =
     rating >= 1 &&
     rating <= 5 &&
     title.trim().length >= 3 &&
     title.trim().length <= 100 &&
     comment.trim().length >= 10 &&
-    comment.trim().length <= 1000;
+    (comment.trim().length <= MAX_COMMENT_LENGTH ||
+    legacyCommentUnchanged);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -192,7 +200,10 @@ const ReviewModal = ({
               id="review-comment"
               value={comment}
               onChange={(event) => setComment(event.target.value)}
-              maxLength={1000}
+              maxLength={Math.max(
+                MAX_COMMENT_LENGTH,
+                existingReview?.comment?.length ?? 0
+              )}
               rows={5}
               disabled={saving}
               placeholder="Tell the other souls what happened..."
@@ -201,7 +212,12 @@ const ReviewModal = ({
             />
 
             <p className="mt-1 text-right text-[11px] text-gray-500">
-              {comment.length}/1000
+              {comment.length}/{MAX_COMMENT_LENGTH}
+                {legacyCommentUnchanged && (
+                  <span className="ml-2 text-amber-400">
+                    Original review preserved
+                  </span>
+                )}
             </p>
           </div>
 
