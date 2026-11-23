@@ -16,6 +16,17 @@ const ProductReviews = ({ productId, onReviewChanged }) => {
   const [reviews, setReviews] = useState([]);
   const [allReviews, setAllReviews] = useState([]);
   const [expanded, setExpanded] = useState(false);
+
+  // Track which individual review cards are expanded
+  const [expandedCards, setExpandedCards] = useState({});
+
+  const toggleReviewCard = (reviewId) => {
+    setExpandedCards((previous) => ({
+      ...previous,
+      [reviewId]: !previous[reviewId],
+    }));
+  };
+
   const [loadingAll, setLoadingAll] = useState(false);
   const [reviewCount, setReviewCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -342,11 +353,34 @@ const displayedReviews = expanded ? allReviews : reviews;
               review.user?.name ||
               "Unknown Soul";
 
+            const isExpanded = Boolean(expandedCards[review._id]);
+
             return (
+              
               <article
                 key={review._id}
-                className="flex flex-col rounded-lg border border-[#51303d] bg-[#21151f] p-4"
+                role="button"
+                tabIndex={0}
+                aria-expanded={isExpanded}
+                aria-label={`${isExpanded ? "Collapse" : "Expand"} review: ${review.title}`}
+                onClick={() => toggleReviewCard(review._id)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    toggleReviewCard(review._id);
+                  }
+                }}
+                className="
+                  flex cursor-pointer flex-col
+                  rounded-lg border border-[#51303d]
+                  bg-[#21151f] p-4
+                  transition-colors duration-200
+                  hover:border-red-500/50
+                  focus-visible:outline-2
+                  focus-visible:outline-red-400
+                "
               >
+
                 {/* Author and stars */}
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <span className="text-sm font-semibold text-red-300">
@@ -376,9 +410,23 @@ const displayedReviews = expanded ? allReviews : reviews;
                   {review.title}
                 </h3>
 
-                <p className="mt-2 flex-1 whitespace-pre-wrap break-words text-sm leading-relaxed text-gray-400">
-                  {review.comment}
-                </p>
+                
+                  {/* Review text — collapsed by default */}
+                  <p
+                    className={`mt-2 flex-1 whitespace-pre-wrap break-words text-sm leading-relaxed text-gray-400 ${
+                      isExpanded
+                        ? "line-clamp-none"
+                        : "line-clamp-3 sm:line-clamp-4"
+                    }`}
+                  >
+                    {review.comment}
+                  </p>
+
+                  {/* Expand/collapse hint */}
+                  <p className="mt-3 text-right text-[11px] font-medium text-red-400">
+                    {isExpanded ? "Show Less ↑" : "Read Full Review ↓"}
+                  </p>
+
 
                 {/* Date */}
                 <p className="mt-4 text-xs text-gray-500">
